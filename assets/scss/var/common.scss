@@ -1,0 +1,128 @@
+/**
+ * bg: background
+ * bgc: background-color
+ * c: color
+ */
+
+// 主题色
+$c-theme: #205081;
+// 页面头部高度
+$page-header-height: 50px;
+// 页面面包屑高度
+$page-crumbs-height: 32px;
+// 页面菜单宽度
+$page-menu-width: 200px;
+// 页面菜单宽度-折叠时
+$page-menu-collapse-width: 60px;
+// 滚动条宽度
+$croll-size: 10px;
+
+// 以下变量同时影响element主题样式，只读勿改
+/* Colors
+-------------------------- */
+$c-white: #fff !default;
+$c-black: #000 !default;
+
+$c-main: #3ecf8e !default;
+$c-main-light-1: mix($c-white, $c-main, 10%) !default; /* 53a8ff */
+$c-main-light-2: mix($c-white, $c-main, 20%) !default; /* 66b1ff */
+$c-main-light-3: mix($c-white, $c-main, 30%) !default; /* 79bbff */
+$c-main-light-4: mix($c-white, $c-main, 40%) !default; /* 8cc5ff */
+$c-main-light-5: mix($c-white, $c-main, 50%) !default; /* a0cfff */
+$c-main-light-6: mix($c-white, $c-main, 60%) !default; /* b3d8ff */
+$c-main-light-7: mix($c-white, $c-main, 70%) !default; /* c6e2ff */
+$c-main-light-8: mix($c-white, $c-main, 80%) !default; /* d9ecff */
+$c-main-light-9: mix($c-white, $c-main, 90%) !default; /* ecf5ff */
+
+$c-success: #3ecf8e !default;
+$c-warning: #ffde69 !default;
+$c-danger: #f56c6c !default;
+$c-info: #909399 !default;
+$c-blue: #7bb5fe !default;
+$c-orange: #ff9a7c !default;
+$c-pink: #f6a4eb !default;
+$c-purple: #a29bfe !default;
+
+$c-success-light: mix($c-white, $c-success, 80%) !default;
+$c-warning-light: mix($c-white, $c-warning, 80%) !default;
+$c-danger-light: mix($c-white, $c-danger, 80%) !default;
+$c-info-light: mix($c-white, $c-info, 80%) !default;
+
+$c-success-lighter: mix($c-white, $c-success, 90%) !default;
+$c-warning-lighter: mix($c-white, $c-warning, 90%) !default;
+$c-danger-lighter: mix($c-white, $c-danger, 90%) !default;
+$c-info-lighter: mix($c-white, $c-info, 90%) !default;
+
+$c-text-main: #303133 !default;
+$c-text-regular: #606266 !default;
+$c-text-secondary: #909399 !default;
+$c-text-placeholder: #c0c4cc !default;
+$c-text-revert: #ffffff !default;
+
+/* Link
+-------------------------- */
+$link-c: $c-main-light-2 !default;
+$link-hover-c: $c-main !default;
+
+/* Background
+-------------------------- */
+$bgc-base: #F1F2F7 !default;
+
+/* Border
+-------------------------- */
+$border-width-base: 1px !default;
+$border-style-base: solid !default;
+$border-c-base: #d8dce6 !default;
+$border-c-light: #e4e7ed !default;
+$border-c-lighter: #ebeef5 !default;
+$border-c-extra-light: #f2f6fc !default;
+$border-c-hover: $c-text-placeholder !default;
+$border-base: $border-width-base $border-style-base $border-c-base !default;
+$border-radius-base: 4px !default;
+$border-radius-small: 2px !default;
+$border-radius-circle: 100% !default;
+
+/* Box-shadow
+-------------------------- */
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04) !default;
+$box-shadow-dark: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .12) !default;
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !default;
+
+/* Fill
+-------------------------- */
+$fill-base: $c-white !default;
+
+/* Font
+-------------------------- */
+$font-path: 'fonts' !default;
+$font-size-base: 14px !default;
+$font-size-small: 13px !default;
+$font-size-mini: 12px !default;
+$font-size-large: 18px !default;
+$font-c-disabled-base: #bbb !default;
+$font-weight-main: 500 !default;
+$font-line-height-main: 24px !default;
+
+/* Size
+-------------------------- */
+$size-base: 14px !default;
+
+/* z-index
+-------------------------- */
+$index-normal: 1 !default;
+$index-top: 1000 !default;
+$index-popper: 2000 !default;
+
+/* Disable base
+-------------------------- */
+$disabled-fill-base: $bgc-base !default;
+$disabled-c-base: $c-text-placeholder !default;
+$disabled-border-base: $border-c-light !default;
+
+/* Icon
+-------------------------- */
+$icon-c: #666 !default;
+$icon-c-light: $c-text-placeholder !default;
+$icon-c-base: $c-info !default;
+
+$status-info: $c-success;

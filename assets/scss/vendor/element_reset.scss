@@ -1,0 +1,156 @@
+@import "../var/common";
+
+// element相关样式重置
+.el-button [class*="my-icon-"] {
+  &+span {
+    margin-left: 5px;
+  }
+}
+
+.el-menu-item,
+.el-submenu {
+  [class^="my-icon-"] {
+    vertical-align: middle;
+    margin-right: 5px;
+    width: 24px;
+    text-align: center;
+    font-size: 18px;
+  }
+}
+
+.el-notification {
+  line-height: normal;
+}
+
+// 表格字体
+.el-table--small {
+  font-size: 14px;
+}
+
+// 表格边框 - 左、上
+.el-table--group,
+.el-table--border {
+  border-left: $border-base;
+  border-top: $border-base;
+}
+
+// 表格边框- 底部
+.el-table--group::after,
+.el-table--border::after,
+.el-table::before,
+.el-table__fixed::before,
+.el-table__fixed-right::before {
+  background-color: $border-c-base;
+}
+
+// td边框色 - 底部
+.el-table th.is-leaf,
+.el-table td {
+  border-bottom: $border-base;
+}
+
+// td边框色 - 右侧
+.el-table--border th,
+.el-table--border td {
+  border-right: $border-base;
+}
+
+// 表格表头颜色
+.el-table thead th {
+  color: $c-text-main;
+}
+
+// 斑马线 背景色
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background: #f9fafc;
+}
+
+// 选中行
+.el-table__body tr.current-row>td {
+  background-color: rgba($c-main, .1);
+}
+
+// 表格hover
+.el-table__body tr.hover-row>td,
+.el-table__body tr.hover-row.current-row>td,
+.el-table__body tr.hover-row.el-table__row--striped>td,
+.el-table__body tr.hover-row.el-table__row--striped.current-row>td,
+.el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #f4f5f8;
+}
+
+.el-pagination {
+  text-align: right;
+  font-weight: normal;
+}
+
+.el-dialog__header {
+  border-bottom: $border-base;
+}
+
+.el-dialog__footer {
+  border-top: $border-base;
+}
+
+// 表单
+.el-form-item__label {
+	line-height: normal;
+	font-size: 12px;
+}
+
+.el-form--label-top{
+	.el-form-item__label {
+		line-height: normal !important;
+		padding:0 !important;
+	}
+}
+
+
+
+.el-form-item__content {
+  line-height: normal;
+}
+
+.el-form-item--mini{
+	.distpicker-address-wrapper{
+		select{
+			height:29px;
+			line-height:normal;
+			padding:5px;
+			font-size:12px;
+		}
+	}
+}
+.el-form-item--small{
+	.distpicker-address-wrapper{
+		select{
+			height:32px;
+			line-height:normal;
+			padding:5px;
+			font-size:12px;
+		}
+	}
+}
+.el-form-item--medium{
+	.distpicker-address-wrapper{
+		select{
+			height:36px;
+			line-height:normal;
+			padding:5px;
+			font-size:12px;
+		}
+	}
+}
+.el-form--label-top{
+	button{
+		margin-top: 20px;
+	}
+}
+
+
+
+// 树
+// 默认空文本颜色
+.el-tree__empty-text{
+  color: $c-info;
+}

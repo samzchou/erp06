@@ -1,0 +1,119 @@
+{
+    "collectionList":[
+        {"name":"图表列表","colname":"dashboardList"},
+        {"name":"图表组件","colname":"chartComponents"},
+        {"name":"图表表单","colname":"chartForms"}
+    ],
+    "collections":{
+        "user":{
+            "id":{
+                "type":"Number", 
+                "default":0, 
+                "label":"ID",
+                "key":"id",
+                "sort":0, 
+                "notForm":true
+            },
+            "roles":{
+                "type":"Array", 
+                "default":[], 
+                "widgetType":"select",
+                "multiple": true,
+                "label":"权限", 
+                "key":"roles",
+                "rules":[
+                    {"type": "array","required": true,"min": 1,"message": "请至少选1项"}
+                ],
+                "valueSet":"role",
+                "sort":1
+            },
+            "orgid":{
+                "type":"Number", 
+                "default":"", 
+                "widgetType":"select",
+                "multiple":false,
+                "label":"部门", 
+                "width":150,
+                "key":"orgId",
+                "valueSet":"org",
+                "inSearch":true,
+                "emit":["emit_posId"],
+                "sort":2
+            },
+            "posid":{
+                "type":"Number", 
+                "default":"", 
+                "widgetType":"select",
+                "multiple":false,
+                "width":150,
+                "label":"职位", 
+                "key":"posId",
+                "valueSet":"pos",
+                "sort":3
+            },
+            "username" : {
+                "type":"String", 
+                "widgetType":"input",
+                "default":"", 
+                "subtype":"text",
+                "width":200,
+                "label":"用户名",
+                "key":"username",
+                "rules":[
+                    {"required": true, "message": "请输入用户名", "trigger": "blur"},
+                    {"min": 3,"max": 10,"type": "string","message": "长度在3~10个单元","trigger": "blur"}
+                ],
+                "inSearch":true,
+                "sort":4
+            },
+            "password" : {
+                "type":"String", 
+                "widgetType":"input",
+                "subtype":"password",
+                "default":"juehe123456", 
+                "width":200,
+                "label":"登录密码",
+                "key":"password",
+                "rules":[
+                    {"required": true, "message": "请输入密码", "trigger": "blur"},
+                    {"min": 5,"type": "string","message": "长度至少在5个单元","trigger": "blur"}
+                ],
+                "sort":5
+            },
+            "name" : {
+                "type":"String", 
+                "widgetType":"input",
+                "subtype":"text",
+                "width":150,
+                "default":"", 
+                "label":"姓名",
+                "key":"name",
+                "rules":[
+                    {"required": true, "message": "请输入姓名", "trigger": "blur"}
+                ],
+                "inSearch":true,
+                "sort":6
+            },
+            "sex":{
+                "type": "Number", 
+                "default":1, 
+                "widgetType":"radio",
+                "label":"性别", 
+                "key":"sex",
+                "options":[{"name":"男","value":1},{"name":"女","value":2}],
+                "rules": [
+                    {"required": true,"message": "请选择","trigger": "blur"}
+                ],
+                "sort":7
+            },
+            "token" :{
+                "type":"String",  
+                "widgetType":"input", 
+                "label":"TOKEN",
+                "key":"token",
+                "notForm":true,
+                "sort":13
+            }
+        }
+    }
+}

@@ -1,0 +1,23 @@
+// 第三方样式
+// 直接使用生成的静态，项目启动更快 大约节省8-9s项目启动时间
+// 相关样式改好后调用 npm run create_static
+// 如需实时编译 更改nuxt.js相关配置
+
+// 字体路径重置
+$--font-path: '/fonts';
+$fa-font-path: "/fonts" !default;
+// $--font-path: '~/static/fonts';
+// $fa-font-path: "~/static/fonts" !default;
+
+/* 改变主题色变量 */
+//@import "element_var";
+/* element样式库 */
+@import "./element/index";
+// /* element样式覆盖 */
+// @import "element_reset";
+/* font-awesome字体样式库 */
+@import "font/font-awesome";
+/* css3动画样式库 */
+@import "animate/animate";
+/* 浏览器标准化样式库 */
+@import "normalize/normalize";

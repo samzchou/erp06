@@ -1,0 +1,9 @@
+{
+  "demo": {
+    "publicTest": "公共测试"
+  },
+  "common": {
+    "en_us": "美式英文",
+    "zh_cn": "简体中文"
+  }
+}
