@@ -5,6 +5,7 @@ var myUri = 'mongodb://'+dbServer.dbConect.dataUrl+':'+dbServer.dbConect.dataPor
 if(dbServer.dbConect.username && dbServer.dbConect.password){
     myUri = myUri = 'mongodb://'+dbServer.dbConect.username+':'+dbServer.dbConect.password+'@'+dbServer.dbConect.dataUrl+':'+dbServer.dbConect.dataPort+'/'+dbServer.dbConect.dataName;
 }
+//useFindAndModify: false
 const optionsMongoose = {
     useNewUrlParser: true
 };

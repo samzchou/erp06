@@ -42,24 +42,23 @@ module.exports = {
 		'~/plugins/axios',
 		'~/plugins/filters.js',  //全局过滤器
 		'~/plugins/global.js',  //全局变量
-		'~/plugins/print',
 		{src: '~/plugins/storage',ssr:false},
-		{src: '~/plugins/echarts', ssr:false},
-		{src: '~/plugins/VDistpicker', ssr:false},
-		{src: '~/plugins/context-menu', ssr:false}
+		{src: '~/plugins/echarts', ssr:false}
 	],
 
 	/*
 	** Nuxt.js modules
 	*/
 	modules: [
-		// 全局 scss 变量引入
-		[
-			"nuxt-sass-resources-loader",
-			{resources: "~/assets/scss/var/common.scss"}
-		],
-		'@nuxtjs/axios'
-	],
+        // 全局 scss 变量引入
+        '@nuxtjs/style-resources',
+        // Doc: https://github.com/nuxt-community/axios-module#usage
+        '@nuxtjs/axios'
+    ],
+    styleResources: {
+        scss: '~/assets/scss/var/common.scss'
+        //sass: []
+    },
 	/*
 	** Axios module configuration
 	*/
@@ -72,11 +71,51 @@ module.exports = {
 	** Build configuration
 	*/
 	build: {
-		vendor: ["vuedraggable"],
-		extractCSS: true,
-		extend(config, ctx) {
-			const vueLoader = config.module.rules.find((rule) => rule.loader === 'vue-loader');
-			vueLoader.options.loaders.i18n = '@kazupon/vue-i18n-loader';
-		}
+		//vendor: ["vuedraggable"],
+		//extractCSS: true,
+		transpile: [/^element-ui/],
+		// 提取大体积模块
+        optimization: {
+            splitChunks: {
+                chunks: 'all',
+                automaticNameDelimiter: '.',
+                maxAsyncRequests: 7,
+                maxInitialRequests: 5, // 默认为3个，设置为能拆分为5个，nuxt自身也有个commons的cacheGroups
+                cacheGroups: {
+                    /* vendors: {
+                        test: /[\\/]node_modules[\\/]/,
+                        priority: 1
+                    }, */
+                    "vue-charts": {
+                        test: /vue-charts/,
+                        chunks: 'all',
+                        priority: 20,
+                        name: true
+                    },
+                    "element-ui": {
+                        test: /element-ui/, //node_modules[\\/]element-ui/
+                        chunks: 'all',
+                        priority: 20,
+                        name: true
+                    }
+                }
+            }
+        },
+        splitChunks: {
+            layouts: false,
+            pages: true,
+            commons: true
+        },
+		extend(config, { isDev, loaders: { vue } }) {
+            vue.i18n = '@kazupon/vue-i18n-loader'; 
+            if (isDev && process.client) {
+                config.module.rules.push({
+                    enforce: 'pre',
+                    test: /.(js|vue)$/,
+                    loader: 'eslint-loader',
+                    exclude: /(node_modules)/
+                });
+            }
+        }
 	},
 }

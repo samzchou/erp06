@@ -343,7 +343,7 @@ export default {
                     type: "clearAll",
                 };
                 this.$axios.$post("mock/db", { data: condition }).then(res=>{
-                    console.log('clearAll',res)
+                    //console.log('clearAll',res)
                 });
             }).catch(() => { });
         },
@@ -351,7 +351,7 @@ export default {
             this.$router.push(path);
         },
         searchSubmit() {
-            console.log(this.formInline);
+            //console.log(this.formInline);
         },
         parseDate(date, format) {
             return moment(date).format(format || "YYYY-MM-DD");
@@ -388,7 +388,7 @@ export default {
         },
         parseOrderList(list) {
             //tabOrder
-            console.log("parseOrderList", list);
+            //console.log("parseOrderList", list);
             this.tabOrder.orderBuyList = _.cloneDeep(list).filter(item => {
                 return !item.isAdded && item.typeId == 1;
             });

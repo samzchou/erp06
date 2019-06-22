@@ -260,6 +260,7 @@ const dbFun = {
                 await mongoDB[tn].create(item);
 				await mongoDB.counters.findOneAndUpdate({'model':tn}, {$inc:{count:1}});
             }
+
 			// 盘点详细清单
 			lastId++;
 			let calcItem = {

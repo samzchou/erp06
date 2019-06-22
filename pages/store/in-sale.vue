@@ -255,8 +255,7 @@ export default {
 					orderIds = orderIds.concat(item.orderIds);
 					let obj = {
 						typeId: item.typeId,
-                        storeTypeId: 1,
-                        crmId:item.crmId,
+						storeTypeId: 1,
 						materialNo: item.materialNo,
 						productId: item.productId,
 						productName: item.productName,
