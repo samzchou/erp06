@@ -388,6 +388,16 @@ module.exports = {
                 type: Number,
                 default: 0
             },
+            isColled: {
+                type: Boolean,
+                default: false,
+                label: '是否已导出配料单'
+            },
+            business: {
+                type: Number,
+                default: 0,
+                label: '业务类型' // 售后或项目等
+            },
             isCanceled: {
                 type: Boolean,
                 default: false,

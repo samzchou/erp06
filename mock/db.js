@@ -81,7 +81,6 @@ const dbFun = {
 		let total = 0;
         let condition = params.data || {};
 		let countTotal = await mongoDB[tn].distinct(params.distinct, condition);
-
 		if(params.groupCount && countTotal.length){
 			let gtotal = await mongoDB[tn].aggregate(params.groupCount);
 			total = gtotal[0]['total'];

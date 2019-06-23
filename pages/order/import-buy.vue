@@ -549,13 +549,16 @@ export default {
 				this.lastId++;
 				index++;
 				item.id = this.lastId;
-				item.serial = this.checkSerial(index);
-				delete item.index;//, delete item.metaprice;
+                item.serial = this.checkSerial(index);
+                if(/^91/.test(item.sourceserial)){ // 是否为售后类型
+                    item.business = 1;
+                }else if(/^45/.test(item.sourceserial)){
+                    item.business = 2;
+                }
+				delete item.index;
 				dataList.push(item);
 			});
-			/* console.log("saveData", dataList, this.sourceData);
-			loadingMask.close();
-			return; */
+
 			let condition = {
 				type: "addPatch",
 				collectionName: "order",

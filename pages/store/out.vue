@@ -191,7 +191,7 @@ export default {
 			gridList: [],
 			query: {
 				page: 1,
-				pagesize: 100
+				pagesize: 500
 			},
 			searchForm: {
 				serial: '',
