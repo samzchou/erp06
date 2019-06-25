@@ -45,7 +45,7 @@
                         </el-table>
                     </div>
                     <div class="pages">
-                        <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[30, 50, 100, 300]" :page-size="query.pagesize" layout="total, sizes, prev, pager, next" :total="total" />
+                        <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[30, 50, 100, 300,500]" :page-size="query.pagesize" layout="total, sizes, prev, pager, next" :total="total" />
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="已开发票" name="second">已开发票</el-tab-pane>
@@ -63,7 +63,7 @@ export default {
         gridList: [],
         query: {
             page: 1,
-            pagesize: 50
+            pagesize: 500
         },
         total:0,
     }),

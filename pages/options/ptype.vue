@@ -50,7 +50,7 @@
                 </el-table-column>
             </el-table>
             <div class="page-container" style="padding: 10px 0;">
-                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes, prev, pager, next" :total="total">
+                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes, prev, pager, next" :total="total">
                 </el-pagination>
             </div>
         </div>
@@ -84,7 +84,7 @@ export default {
         return {
             isEdit:false,
             listLoading:false,
-            query:{page:1,pagesize:20},
+            query:{page:1,pagesize:500},
             total:0,
 			typeList:[],
             gridList:[],

@@ -99,7 +99,7 @@
 			</div>
 			<div class="page-container">
 				<div></div>
-				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total"></el-pagination>
+				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total"></el-pagination>
 			</div>
 		</div>
 		<el-dialog title="更新库存遗失或损耗" append-to-body :visible.sync="openDialogVisible" width="480px">
@@ -138,7 +138,7 @@ export default {
 			total: 0,
 			query: {
 				page: 1,
-				pagesize: 50
+				pagesize: 500
 			},
 			setting: {},
 			crmList: [],
@@ -243,7 +243,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && k === "updateDate") {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24 * 3600 * 1000
+							$lte: this.searchForm[k][1]
 						};
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] };

@@ -47,7 +47,7 @@
 			</el-table>
 			<div class="page-container">
 				<div>共有{{total}}个包装单</div>
-				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
+				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
 			</div>
 		</div>
 
@@ -67,7 +67,7 @@ export default {
 			gridList: [],
 			query: {
 				page: 1,
-				pagesize: 100
+				pagesize: 500
 			},
 			total: 0,
 			searchForm: {
@@ -88,7 +88,7 @@ export default {
 					if (_.isArray(this.searchForm[k]) && (k === 'deliveryDate' || k === 'orderDate')) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24*3600*1000
+							$lte: this.searchForm[k][1]
 						}
 					} 
 				}
@@ -167,7 +167,7 @@ export default {
 					if (_.isArray(this.searchForm[k]) && (k === 'deliveryDate' || k === 'orderDate')) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24*3600*1000
+							$lte: this.searchForm[k][1]
 						}
 					} 
 				}

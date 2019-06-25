@@ -86,7 +86,7 @@
 			</el-table>
 			<div class="page-container">
 				<div>共有{{total}}个生产订单，请点击客户名称查阅或操作订单</div>
-				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
+				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
 			</div>
 		</div>
 		<el-dialog title="客户生产清单" append-to-body :visible.sync="openOrderVisible" width="85%">
@@ -162,7 +162,7 @@
 			</div>
 			<div class="btns" v-if="crmOrderList.length">
 				<div>
-					<el-pagination size="mini" @size-change="handleSizeOrder" @current-change="handleCurrentOrder" :current-page.sync="queryIn.page" :page-sizes="[3,20, 50, 100, 200]" :page-size="queryIn.pagesize" layout="total,sizes,prev,pager,next" :total="queryInTotal" />
+					<el-pagination size="mini" @size-change="handleSizeOrder" @current-change="handleCurrentOrder" :current-page.sync="queryIn.page" :page-sizes="[3,20, 50, 100, 200,500]" :page-size="queryIn.pagesize" layout="total,sizes,prev,pager,next" :total="queryInTotal" />
 				</div>
 				<div>
 					<!-- <span>制单交货日期：</span>
@@ -189,7 +189,7 @@ export default {
 			gridList: [],
 			query: {
 				page: 1,
-				pagesize: 50
+				pagesize: 500
 			},
 			total: 0,
 			storeType: [
@@ -211,7 +211,7 @@ export default {
 			openOrderVisible: false,
 			queryIn: {
 				page: 1,
-				pagesize: 50
+				pagesize: 500
 			},
             queryInTotal: 0,
             orderSerial:'',
@@ -433,7 +433,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && k === 'deliveryDate') {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24*3600*1000
+							$lte: this.searchForm[k][1]
 						}
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] }

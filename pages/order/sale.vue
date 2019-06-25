@@ -125,7 +125,7 @@
 			</el-table>
 			<div class="page-container" style="padding: 10px 0;">
 				<div>共有{{total}}个采购订单，请点击订单号操作下单流程</div>
-				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total"></el-pagination>
+				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total"></el-pagination>
 			</div>
 		</div>
 		<!--订单录入-->
@@ -339,7 +339,7 @@ export default {
 			proList: [],
 			query: {
 				page: 1,
-				pagesize: 50
+				pagesize: 500
 			},
 			gridList: [],
 			total: 0,
@@ -1139,7 +1139,7 @@ export default {
 					) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24*3600*1000
+							$lte: this.searchForm[k][1]
 						};
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] };
@@ -1200,24 +1200,6 @@ export default {
 							projectNo: { $first: "$projectNo" },
                             projectName: { $first: "$projectName" },
                             serial: { $first: "$serial" },
-                            /* productId: { $first: "$productId" },
-                            materialNo: { $first: "$materialNo" },
-                            typeId: { $first: "$typeId" },
-							ptypeId: { $first: "$ptypeId" },
-							flowStateId: { $first: "$flowStateId" },
-							productName: { $first: "$productName" },
-							crmId: { $first: "$crmId" },
-							crmName: { $first: "$crmName" },
-							boxNo: { $first: "$boxNo" },
-							model: { $first: "$model" },
-							modelNo: { $first: "$modelNo" },
-							caselNo: { $first: "$caselNo" },
-							util: { $first: "$util" },
-							price: { $first: "$price" },
-							metaprice: { $first: "$metaprice" },
-                            count: { $first: "$count" }, 
-                            content: { $first: "$content" },
-							flowState: { $sum: "$flowStateId" },*/
 							orderDate: { $first: "$orderDate" },
 							deliveryDate: { $first: "$deliveryDate" },
                             total: { $sum: 1 },

@@ -52,7 +52,7 @@
 					</el-table-column>
 				</el-table>
 				<div class="page-container" style="padding: 10px 0;">
-						<el-pagination size="mini" @size-change="uploadSizeChange" @current-change="uploadCurrentChange" :current-page.sync="queryUpload.page" :page-sizes="[20, 50, 100, 200]" :page-size="queryUpload.pagesize" layout="total,sizes, prev, pager, next" :total="uploadTotal">
+						<el-pagination size="mini" @size-change="uploadSizeChange" @current-change="uploadCurrentChange" :current-page.sync="queryUpload.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="queryUpload.pagesize" layout="total,sizes, prev, pager, next" :total="uploadTotal">
 						</el-pagination>
 				</div>
 			</div>
@@ -92,7 +92,7 @@ export default {
 			uploadTotal:0,
 			queryUpload:{
 				page:1,
-				pagesize:20
+				pagesize:500
 			},
 			lastId:0,
 			tableForm:{

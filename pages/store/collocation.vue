@@ -34,7 +34,7 @@
                         <el-input v-model="searchForm.projectName" clearable style="width:150px" />
                     </el-form-item>
                     <el-form-item label="交货日期：" prop="deliveryDate">
-                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" clearable editable unlink-panels style="width:250px" />
+                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" clearable editable unlink-panels style="width:150px" />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submitSearch">搜索</el-button>
@@ -82,7 +82,7 @@
             </div>
             <div class="page-container" style="padding: 10px 0;">
                 <div v-if="!exportLoading">
-                    <span style="margin-right:15px;">请选择需要导出的配料单</span>
+                    <span style="margin-right:15px;">请按照交货日期查询数据，并选择需要导出的配料单</span>
                     <el-button size="mini" type="primary" :disabled="!orderList.length" @click="exportTable">导出配料单({{orderList.length}})</el-button>
                 </div>
                 <div v-else>
@@ -156,6 +156,16 @@ export default {
                 })
             });
         },
+        totalCount(lists){
+            let allCount = 0, ids = [];
+			lists.forEach(item => {
+                if(item.checked){
+                    allCount += item.count;
+                    ids.push(item.id);
+                }
+            });
+            return {'allCount':allCount, 'ids':ids};
+        },
         exportTable() {
             this.exportLoading = true;
             //console.log(this.orderList);
@@ -164,36 +174,37 @@ export default {
                 exportData.push({
                     "businessName":"",
                     "productName":item.productName,
-                    "count":"",//item.allcount,
+                    "count":"",
+                    "deliveryDate":"",
                     "a1":"",
                     "a2":"",
                     "a3":""
                 });
-                item.result.forEach(c=>{
-                    if(c.checked){
-                        exportData.push({
-                            'index':index,
-                            "businessName":this.parseBusiness(c.business),
-                            "productName":c.materialNo,
-                            "count":c.count,
-                            "deliveryDate":item.deliveryDate,
-                            "a1":"",
-                            "a2":"",
-                            "a3":""
-                        });
-                        ids.push(c.id);
-                        index++;
-                    }
-                })
+                let res = this.totalCount(item.result);
+                exportData.push({
+                    'index':index,
+                    "businessName":this.parseBusiness(item.business),
+                    "productName":item.materialNo,
+                    "count":res.allCount,
+                    "deliveryDate":item.deliveryDate,
+                    "a1":"",
+                    "a2":"",
+                    "a3":""
+                });
+                index++;
+                ids = _.concat(ids, res.ids);
+               
             });
-            //console.log('exportData', exportData)
+            console.log('deliveryDate',this.searchForm.deliveryDate)
+            /* console.log('exportData', exportData);
+            console.log('ids', ids); */
             //return;
             import('@/components/Export2Excel').then(excel => {
-                const tHeader = ['序号','业务类型', '物料信息', '数量', '交货日期', '配料人', '仓管', '领料人'];
+                const tHeader = ['序号','业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
                 const filterVal = ['index','businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
                 //debugger
                 const data = this.formatJson(filterVal, exportData);
-                const now = moment(new Date()).format('YYYYMMDD');
+                const now = moment(this.searchForm.deliveryDate?this.searchForm.deliveryDate:new Date()).format('YYYYMMDD');
                 excel.export_json_to_excel({
                     header: tHeader,
                     data,
@@ -242,11 +253,11 @@ export default {
                 if (this.searchForm[k] != '' && this.searchForm[k]) {
                     if (_.isNumber(this.searchForm[k])) {
                         params[k] = Number(this.searchForm[k]);
-                    } else if (_.isArray(this.searchForm[k]) && (k === 'orderDate' || k === 'deliveryDate')) {
+                    /* } else if (_.isArray(this.searchForm[k]) && (k === 'orderDate' || k === 'deliveryDate')) {
                         params[k] = {
                             $gte: this.searchForm[k][0],
-                            $lt: this.searchForm[k][1] + 24 * 3600 * 1000
-                        }
+                            $lt: this.searchForm[k][1]
+                        } */
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] };
                     } else {
@@ -294,6 +305,7 @@ export default {
                         "$group": {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
+                            "business": { "$first": "$business" },
                             "materialNo": { "$first": "$materialNo" },
                             "crmName": { "$first": "$crmName" },
                             "productName": { "$first": "$productName" },
@@ -302,7 +314,7 @@ export default {
                             "result": { "$push": "$$ROOT" }
                         }
                     },
-                    { $sort: { "productName": 1 } },
+                    { $sort: {"productName": 1,"deliveryDate":1} }, // "productName": 1, "projectNo": 1, 
                     { $skip: (this.query.page - 1) * this.query.pagesize },
                     { $limit: this.query.pagesize }
                 ]
@@ -310,6 +322,7 @@ export default {
             let result = await this.$axios.$post('mock/db', { data: condition });
             this.total = result.total;
             this.gridList = result.list.map(item => {
+                item.result = _.sortBy(item.result, ['projectNo', 'deliveryDate']);
                 item.result = item.result.map(c=>{
                     c.checked = true;
                     return c;

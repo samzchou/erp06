@@ -448,7 +448,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && (k === 'orderDate' || k === 'deliveryDate')) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lt: this.searchForm[k][1] + 24 * 3600 * 1000
+							$lt: this.searchForm[k][1]
 						}
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] }
@@ -520,7 +520,7 @@ export default {
 							"result": { "$push": "$$ROOT" }
 						}
 					},
-					{ $sort: { deliveryDate: 1 } },
+					{ $sort: { "deliveryDate": 1,"projectNo": 1 } },
 					{ $skip: (this.query.page - 1) * this.query.pagesize },
 					{ $limit: this.query.pagesize }
 				]

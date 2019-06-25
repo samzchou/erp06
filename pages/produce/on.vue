@@ -149,7 +149,7 @@
                 <span>
                     <el-button v-if="searchForm.flowStateId==6 && gridList.length" type="primary" icon="el-icon-document" @click="setPatch" :disabled="!patchIds.length">批量完成生产</el-button>
                 </span>
-                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
+                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
                 </el-pagination>
             </div>
         </div>
@@ -174,7 +174,7 @@ export default {
             total:0,
             query:{
                 page:1,
-                pagesize:100
+                pagesize:500
             },
             typeList:[],//settings.type,
             storeNoList:[],//settings.storeNo,
@@ -327,7 +327,7 @@ export default {
                         }else if(_.isArray(this.searchForm[k]) && (k==='orderDate' || k==='deliveryDate')){
                             params[k] = {
                                 $gte:this.searchForm[k][0],
-                                $lte:this.searchForm[k][1] + 24*3600*1000
+                                $lte:this.searchForm[k][1]
                             }
                         }else if(_.isArray(this.searchForm[k])){
                             params[k] = {$in:this.searchForm[k]}

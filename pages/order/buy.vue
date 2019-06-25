@@ -127,7 +127,7 @@
 			</el-table>
 			<div class="page-container">
 				<div>共有{{total}}个采购订单，请点击供应商名称或导出采购订单操作流程</div>
-				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
+				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total" />
 			</div>
 		</div>
 		<!--订单录入-->
@@ -359,7 +359,7 @@ export default {
 			proList: [],
 			query: {
 				page: 1,
-				pagesize: 100
+				pagesize: 500
 			},
 			gridList: [],
 			total: 0,
@@ -1260,7 +1260,7 @@ export default {
 					) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] + 24 * 3600 * 1000
+							$lte: this.searchForm[k][1]
 						};
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] };
@@ -1322,27 +1322,8 @@ export default {
 							sourceserial: { $first: "$sourceserial" },
 							projectNo: { $first: "$projectNo" },
 							projectName: { $first: "$projectName" },
-                            /* productId: { $first: "$productId" },
-                            typeId: { $first: "$typeId" },
-							ptypeId: { $first: "$ptypeId" },
-							flowStateId: { $first: "$flowStateId" },
-							serial: { $first: "$serial" },
-                            materialNo: { $first: "$materialNo" },
-                            productName: { $first: "$productName" },
-                            crmId: { $first: "$crmId" },
-							crmName: { $first: "$crmName" },
-							boxNo: { $first: "$boxNo" },
-							model: { $first: "$model" },
-							modelNo: { $first: "$modelNo" },
-							caselNo: { $first: "$caselNo" },
-							util: { $first: "$util" },
-							price: { $first: "$price" },
-							metaprice: { $first: "$metaprice" },
-							count: { $first: "$count" }, */
 							orderDate: { $first: "$orderDate" },
 							deliveryDate: { $first: "$deliveryDate" },
-							//content: { $first: "$content" },
-							//flowState: { $sum: "$flowStateId" },
 							total: { $sum: 1 },
 							result: { $push: "$$ROOT" }
 						}
@@ -1379,9 +1360,7 @@ export default {
 				}
 			};
 			let res = await this.$axios.$post("mock/db", { data: cn });
-			//debugger
 			if (res) {
-				//console.log("lastId-storeId", res);
 				this.storeLastId = res;
 			}
 		},

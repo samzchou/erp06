@@ -99,7 +99,7 @@
             </el-table>
             <div class="page-container">
                 <div>本页合计付款金额：{{totalMoney | currency}}</div>
-                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
+                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
                 </el-pagination>
             </div>
         </div>
@@ -198,12 +198,12 @@ export default {
             },
             query:{
                 page:1,
-                pagesize:50
+                pagesize:500
             },
             orderTotal:0,
             queryOrder:{
                 page:1,
-                pagesize:50
+                pagesize:500
             },
             gridList:[],
             lastId:0,
@@ -440,7 +440,7 @@ export default {
                     }else if(_.isArray(this.searchForm[k]) && k==='finishedDate'){
                         params[k] = {
                             $gte:this.searchForm[k][0],
-                            $lte:this.searchForm[k][1] + 24*3600*1000
+                            $lte:this.searchForm[k][1]
                         }
                     }else if(_.isArray(this.searchForm[k])){
                         params[k] = {$in:this.searchForm[k]}
