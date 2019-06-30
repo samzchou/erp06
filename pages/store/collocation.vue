@@ -34,7 +34,8 @@
                         <el-input v-model="searchForm.projectName" clearable style="width:150px" />
                     </el-form-item>
                     <el-form-item label="交货日期：" prop="deliveryDate">
-                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" clearable editable unlink-panels style="width:150px" />
+                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" clearable editable unlink-panels style="width:150px"
+                        />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submitSearch">搜索</el-button>
@@ -42,7 +43,8 @@
                 </el-form>
             </div>
             <div>
-                <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini" max-height="500" @selection-change="handleSelectionChange">
+                <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini"
+                    max-height="500" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50" align="center" />
                     <el-table-column type="index" width="70" align="center">
                         <template slot-scope="scope">
@@ -53,7 +55,7 @@
                         <template slot-scope="scope" v-if="scope.row.result && scope.row.result.length">
                             <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
                                 <el-col :span="1">
-                                    <el-checkbox v-model="item.checked" @change="setChecked(item, scope.row)"/>
+                                    <el-checkbox v-model="item.checked" @change="setChecked(item, scope.row)" />
                                 </el-col>
                                 <el-col :span="3">
                                     <span style="width:30px">{{idx+1}}、</span>
@@ -89,7 +91,9 @@
                     <i class="el-icon-loading" /> 正在导出配料单...
                 </div>
 
-                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[5,20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
+                <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
+                    :page-sizes="[5,20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next"
+                    :total="total">
                 </el-pagination>
             </div>
         </div>
@@ -102,7 +106,7 @@ export default {
         return {
             isColled: false, // 是否已导出
             listLoading: false,
-            crmList:[],
+            crmList: [],
             total: 0,
             gridList: [],
             query: {
@@ -111,7 +115,7 @@ export default {
             },
             searchForm: {
                 serial: '',
-                crmId:'',
+                crmId: '',
                 materialNo: '',
                 productName: '',
                 orderDate: '',
@@ -128,7 +132,7 @@ export default {
     methods: {
         parseBusiness(val) {
             if (!val) return "";
-            return val==1 ? "售后" : "项目";
+            return val == 1 ? "售后" : "项目";
         },
         // 切换导出和未导出
         setOrderParams(flag) {
@@ -137,74 +141,74 @@ export default {
             this.query.page = 1;
             this.getList();
         },
-        setChecked(item, row){
+        setChecked(item, row) {
             let checkedCount = 0;
-            row.result.forEach(item=>{
-                if(item.checked){
+            row.result.forEach(item => {
+                if (item.checked) {
                     checkedCount++;
                 }
             });
-            this.$refs.detailStore.toggleRowSelection(row, checkedCount>0);
+            this.$refs.detailStore.toggleRowSelection(row, checkedCount > 0);
         },
 
         handleSelectionChange(rows) {
             this.orderList = rows;
-            this.gridList.forEach(item=>{
-                let index = _.findIndex(rows,{"id":item.id});
-                item.result.forEach(c=>{
+            this.gridList.forEach(item => {
+                let index = _.findIndex(rows, { "id": item.id });
+                item.result.forEach(c => {
                     c.checked = !!~index;
                 })
             });
         },
-        totalCount(lists){
+        totalCount(lists) {
             let allCount = 0, ids = [];
-			lists.forEach(item => {
-                if(item.checked){
+            lists.forEach(item => {
+                if (item.checked) {
                     allCount += item.count;
                     ids.push(item.id);
                 }
             });
-            return {'allCount':allCount, 'ids':ids};
+            return { 'allCount': allCount, 'ids': ids };
         },
         exportTable() {
             this.exportLoading = true;
             //console.log(this.orderList);
-            let exportData = [], index=1, ids= [];
-            this.orderList.forEach(item=>{
+            let exportData = [], index = 1, ids = [];
+            this.orderList.forEach(item => {
                 exportData.push({
-                    "businessName":"",
-                    "productName":item.productName,
-                    "count":"",
-                    "deliveryDate":"",
-                    "a1":"",
-                    "a2":"",
-                    "a3":""
+                    "businessName": "",
+                    "productName": item.productName,
+                    "count": "",
+                    "deliveryDate": "",
+                    "a1": "",
+                    "a2": "",
+                    "a3": ""
                 });
                 let res = this.totalCount(item.result);
                 exportData.push({
-                    'index':index,
-                    "businessName":this.parseBusiness(item.business),
-                    "productName":item.materialNo,
-                    "count":res.allCount,
-                    "deliveryDate":item.deliveryDate,
-                    "a1":"",
-                    "a2":"",
-                    "a3":""
+                    'index': index,
+                    "businessName": this.parseBusiness(item.business),
+                    "productName": item.materialNo,
+                    "count": res.allCount,
+                    "deliveryDate": item.deliveryDate,
+                    "a1": "",
+                    "a2": "",
+                    "a3": ""
                 });
                 index++;
                 ids = _.concat(ids, res.ids);
-               
+
             });
-            console.log('deliveryDate',this.searchForm.deliveryDate)
+            console.log('deliveryDate', this.searchForm.deliveryDate)
             /* console.log('exportData', exportData);
             console.log('ids', ids); */
             //return;
             import('@/components/Export2Excel').then(excel => {
-                const tHeader = ['序号','业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
-                const filterVal = ['index','businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
+                const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
+                const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
                 //debugger
                 const data = this.formatJson(filterVal, exportData);
-                const now = moment(this.searchForm.deliveryDate?this.searchForm.deliveryDate:new Date()).format('YYYYMMDD');
+                const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDD');
                 excel.export_json_to_excel({
                     header: tHeader,
                     data,
@@ -233,7 +237,7 @@ export default {
                 this.submitSearch(true);
             });
         },
-        
+
         formatJson(filterVal, jsonData) {
             return jsonData.map(v => filterVal.map(j => {
                 if (j == 'deliveryDate' && v[j]) {
@@ -253,11 +257,6 @@ export default {
                 if (this.searchForm[k] != '' && this.searchForm[k]) {
                     if (_.isNumber(this.searchForm[k])) {
                         params[k] = Number(this.searchForm[k]);
-                    /* } else if (_.isArray(this.searchForm[k]) && (k === 'orderDate' || k === 'deliveryDate')) {
-                        params[k] = {
-                            $gte: this.searchForm[k][0],
-                            $lt: this.searchForm[k][1]
-                        } */
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] };
                     } else {
@@ -287,7 +286,7 @@ export default {
         async getList(match = {}) {
             this.listLoading = true;
             let groupId = { "materialNo": "$materialNo" };
-            match = _.merge({ "isColled":this.isColled,"flowStateId": { $gte: 2, $lt: 4 }, "typeId":1 }, match);
+            match = _.merge({ "isColled": this.isColled, "flowStateId": { $gte: 2, $lt: 4 }, "typeId": 1 }, match);
             //debugger
             let condition = {
                 type: 'groupList',
@@ -310,11 +309,11 @@ export default {
                             "crmName": { "$first": "$crmName" },
                             "productName": { "$first": "$productName" },
                             "deliveryDate": { "$first": "$deliveryDate" },
-                            "allcount":{$sum:"$count"},
+                            "allcount": { $sum: "$count" },
                             "result": { "$push": "$$ROOT" }
                         }
                     },
-                    { $sort: {"productName": 1,"deliveryDate":1} }, // "productName": 1, "projectNo": 1, 
+                    { $sort: { "productName": 1, "deliveryDate": 1 } }, // "productName": 1, "projectNo": 1, 
                     { $skip: (this.query.page - 1) * this.query.pagesize },
                     { $limit: this.query.pagesize }
                 ]
@@ -323,19 +322,19 @@ export default {
             this.total = result.total;
             this.gridList = result.list.map(item => {
                 item.result = _.sortBy(item.result, ['projectNo', 'deliveryDate']);
-                item.result = item.result.map(c=>{
+                item.result = item.result.map(c => {
                     c.checked = true;
                     return c;
                 });
                 return item;
             });
             console.log('this.gridList', this.gridList);
-            this.$nextTick(()=>{
+            this.$nextTick(() => {
                 this.$refs.detailStore.toggleAllSelection();
                 this.listLoading = false;
             })
         },
-        
+
         async getSetting() {
             let condition = {
                 type: "getData",
