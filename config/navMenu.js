@@ -44,7 +44,7 @@ export default {
                 { "label": "库存清单明细", "icon": "list-ul", "path": "/store/calc-list" },
                 { "label": "库存盘点", "icon": "list-ul", "path": "/store/calc" },
                 { "label": "出库-送货单", "icon": "list-ul", "path": "/store/out" },
-                { "label": "已出库送货", "icon": "list-ul", "path": "/store/outsend" }
+                { "label": "已出库", "icon": "list-ul", "path": "/store/outsend" }
             ]
         },
         {

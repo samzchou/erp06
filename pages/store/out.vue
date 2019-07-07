@@ -27,6 +27,9 @@
                         <el-date-picker v-model="searchForm.orderDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期"
                             end-placeholder="结束日期" clearable editable unlink-panels style="width:250px" />
                     </el-form-item>
+                    <el-form-item label="已推迟：" prop="isDelay">
+                        <el-switch v-model="searchForm.isDelay" />
+                    </el-form-item>
                     <el-form-item label="交货日期：" prop="deliveryDate">
                         <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期"
                             end-placeholder="结束日期" clearable editable unlink-panels style="width:250px" />
@@ -40,6 +43,15 @@
                 <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini"
                     max-height="500" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="50" align="center" :selectable="checkSelectable" />
+                    <el-table-column prop="isDelay" label="推迟送货" align="center" width="80">
+                        <template slot-scope="scope">
+                            <span v-if="!scope.row.isDelay">正常</span>
+                            <span v-else style="color:blue">已推迟</span>
+                            <!-- <a href="javascript:void(0)" v-if="scope.row.isDelay" @click="handleDelay(scope.row, false)">
+                                <i class="my-icon-play" />恢复</a>
+                            <el-button size="mini" v-else type="text" icon="my-icon-pause" @click="handleDelay(scope.row, true)">推迟</el-button> -->
+                        </template>
+                    </el-table-column>
                     <el-table-column type="index" width="50" align="center">
                         <template slot-scope="scope">
                             <span>{{scope.$index+(query.page - 1) * query.pagesize + 1}} </span>
@@ -96,7 +108,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="isCanceled" label="取消送货" width="80">
+                    <el-table-column prop="isCanceled" label="操作" align="center" width="80">
                         <template slot-scope="scope">
                             <el-button v-if="scope.row.isCanceled" size="mini" class="icon-link" icon="my-icon-share" @click="handleCancel(scope.row, false)">恢复</el-button>
                             <el-button v-else size="mini" type="text" icon="my-icon-reply" @click="handleCancel(scope.row, true)">取消</el-button>
@@ -108,6 +120,8 @@
                 <div>
                     <span style="margin-right:15px;">请选择可以出库送货的订单，制定出库送货单</span>
                     <el-button size="mini" type="primary" :disabled="!orderList.length" @click="openDialogVisible=true">制订送货单({{orderList.length-1}})</el-button>
+                    <el-button size="mini" type="primary" icon="el-icon-download" @click="batchDelay" :disabled="!selectSourceserial.length">批量推迟交货</el-button>
+
                 </div>
                 <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
                     :page-sizes="[5,20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next"
@@ -116,11 +130,20 @@
             </div>
         </div>
 
-        <el-dialog title="修改交货日期" append-to-body :visible.sync="editVisible" width="300px" @close="editRow=null">
-            <div v-if="editRow">
-                <el-date-picker size="mini" value-format="timestamp" v-model="editRow.deliveryDate" type="date" :clearable="false" placeholder="选择日期"
-                    style="width:150px;" />
-                <el-button size="mini" type="primary" style="margin-left:10px" @click="changeDate">确定</el-button>
+        <el-dialog :title="editRow?'修改交货日期':'批量推迟交货'" append-to-body :visible.sync="editVisible" width="380px" @close="closeEdit">
+            <div>
+                <el-form size="mini" ref="editForm" :inline="true" :model="delayForm" :rules="delayRules">
+                    <el-form-item label="交货日期" prop="deliveryDate">
+                        <el-date-picker size="mini" value-format="timestamp" v-model="delayForm.deliveryDate" type="date" :clearable="false" placeholder="选择日期"
+                            style="width:150px;" />
+                    </el-form-item>
+                    <el-form-item label="推迟" prop="isDelay">
+                        <el-switch v-model="delayForm.isDelay" />
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="changeDate">确定</el-button>
+                    </el-form-item>
+                </el-form>
             </div>
         </el-dialog>
 
@@ -150,7 +173,6 @@
                             <el-col :span="7">物料描述：{{item.productName}}</el-col>
                             <el-col :span="3">数量：{{item.count}}</el-col>
                         </el-row>
-                        <!-- <div>{{scope.row.result}}</div> -->
                     </template>
                 </el-table-column>
                 <el-table-column type="index" width="50" align="center" />
@@ -202,6 +224,7 @@ export default {
             },
             searchForm: {
                 serial: '',
+                isDelay: false,
                 sourceserial: '',
                 projectNo: '',
                 projectName: '',
@@ -219,50 +242,106 @@ export default {
             editRow: null,
             editVisible: false,
             storeArr: [],            // 库存列表
+            selectSourceserial: [],
+            delayForm: {
+                deliveryDate: '',
+                isDelay: true,
+            },
+            delayRules: {
+                deliveryDate: [{ required: true, message: '请选择交货日期', trigger: 'change' }],
+            }
+
         }
     },
     methods: {
         calcStore(arr) {
             let flag = false;
-            console.log('arr', arr)
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i]['count'] > arr[i]['storeCount'] || [1, 2, 4, 5, 6, 7, 9].includes(arr[i]['flowStateId'])) {
-                    //if(arr[i]['count'] > arr[i]['storeCount'] || [1,2,4,5,6,7,9].includes(arr[i]['flowStateId'])){
                     flag = true;
                     break;
                 }
             }
             return flag;
         },
+        closeEdit() {
+            this.editRow = null;
+            this.delayForm.deliveryDate = "";
+        },
+        batchDelay() {
+            this.editVisible = true;
+            this.editRow = null;
+            this.delayForm.deliveryDate = "";
+        },
         changeDate() {
-            /* */
-            let params = {
-                type: 'updateData',
-                collectionName: 'order',
-                multi: true,
-                condition: {
-                    "sourceserial": this.editRow.sourceserial
-                },
-                data: {
-                    "deliveryDate": this.editRow.deliveryDate
+            this.$refs['editForm'].validate((valid) => {
+                if (valid) {
+                    let sourceserial = this.editRow ? [this.editRow.sourceserial] : this.selectSourceserial;
+                    let params = {
+                        type: 'updateData',
+                        collectionName: 'order',
+                        multi: true,
+                        condition: {
+                            "sourceserial": { $in: sourceserial }
+                        },
+                        data: { ...this.delayForm }
+                    };
+                    console.log('changeDate', params);
+                    //return;
+                    this.$axios.$post('mock/db', { data: params }).then(result => {
+                        sourceserial.forEach(item => {
+                            let index = _.findIndex(this.gridList, { "sourceserial": item });
+                            if (!!~index) {
+                                let row = this.gridList[index];
+                                row = _.merge(row, params.data)
+                                this.$set(this.gridList, index, { ...row });
+                            }
+
+                        })
+
+                        this.editRow = null;
+                        this.editVisible = false;
+                    });
                 }
-            };
-            this.$axios.$post('mock/db', { data: params }).then(result => {
-                let index = _.findIndex(this.gridList, { "id": this.editRow.id });
-                this.$set(this.gridList, index, { ...this.editRow });
-                this.editRow = null;
-                this.editVisible = false;
             });
+
         },
         // 修改交货日期
         editDate(row) {
-            console.log('editDate', row);
             this.editVisible = true;
+            this.delayForm.deliveryDate = row.deliveryDate;
+            this.delayForm.isDelay = row.isDelay;
             this.editRow = _.cloneDeep(row);
+        },
+        // 推迟送花
+        handleDelay(row, flag) {
+            //console.log('handleCancel', row);
+            this.$confirm('确定要' + (flag ? '推迟' : '正常') + '送货?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                let condition = {
+                    type: 'updatePatch',
+                    collectionName: 'order',
+                    param: { "sourceserial": row.sourceserial },
+                    set: {
+                        $set: {
+                            'isDelay': flag
+                        }
+                    }
+                }
+                this.$axios.$post("mock/db", { data: condition }).then(result => {
+                    this.$message.success("已" + (flag ? '推迟' : '恢复正常') + "送货");
+                    row.isDelay = flag;
+                    let index = _.findIndex(this.gridList, { id: row.id });
+                    this.$set(this.gridList, index, row);
+                });
+            }).catch(() => { });
         },
         // 取消订单
         handleCancel(row, flag) {
-            console.log('handleCancel', row);
+            //console.log('handleCancel', row);
             this.$confirm('确定要' + (flag ? '取消' : '恢复') + '该送货单?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -307,6 +386,8 @@ export default {
             return row.finished && !row.isCanceled;
         },
         handleSelectionChange(rows) {
+            console.log('handleSelectionChange', rows)
+            this.selectSourceserial = [];
             this.orderList = rows;
             if (rows.length) {
                 this.updateIds = this.setUpdateIds(this.orderList);
@@ -316,6 +397,12 @@ export default {
                 });
                 this.currItem = null;
                 this.isCanExport = true;
+                // 批量要处理的推迟日期
+                rows.forEach(item => {
+                    if (item.sourceserial) {
+                        this.selectSourceserial.push(item.sourceserial);
+                    }
+                })
             }
         },
         exportOrder() {
@@ -414,20 +501,6 @@ export default {
             })
             return updateIds;
         },
-
-        async showDetail(row) {
-            this.currItem = row;
-            this.openDialogVisible = true;
-            console.log('showDetail', row);
-            this.orderList = [row];
-            this.updateIds = this.setUpdateIds(this.orderList);
-
-            this.isCanExport = row.finished;
-            this.orderList.push({
-                projectName: "合计",
-                boxCount: 1
-            })
-        },
         mergeOrder(lists) {
             let listData = [];
             lists.forEach(item => {
@@ -459,6 +532,8 @@ export default {
                             $gte: this.searchForm[k][0],
                             $lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
                         }
+                    } else if (_.isBoolean(this.searchForm[k])) {
+                        params[k] = this.searchForm[k];
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] }
                     } else {
@@ -516,6 +591,7 @@ export default {
                         "$group": {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
+                            "isDelay": { "$first": "$isDelay" },
                             "isCanceled": { "$first": "$isCanceled" },
                             "serial": { "$first": "$serial" },
                             "sourceserial": { "$first": "$sourceserial" },

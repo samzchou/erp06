@@ -31,6 +31,9 @@
                         <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期"
                             end-placeholder="结束日期" clearable editable unlink-panels style="width:250px" />
                     </el-form-item>
+                    <el-form-item label="已推迟：" prop="isDelay">
+                        <el-switch v-model="searchForm.isDelay" />
+                    </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submitSearch">搜索</el-button>
                     </el-form-item>
@@ -38,7 +41,8 @@
             </div>
             <div>
                 <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini"
-                    max-height="500">
+                    max-height="500" @selection-change="handleSelectionChange">
+                    <el-table-column type="selection" width="50" align="center" :selectable="checkSelectable" />
                     <el-table-column type="index" width="60" label="序号" align="center">
                         <template slot-scope="scope">
                             <span>{{scope.$index+(query.page - 1) * query.pagesize + 1}} </span>
@@ -58,7 +62,8 @@
 
                     <el-table-column prop="flowStateId" label="状态" width="70">
                         <template slot-scope="scope">
-                            <span>{{parseState(scope.row.flowStateId)}}</span>
+                            <a href="javascript:void(0)" v-if="scope.row.isDelay" @click="handleDelay(scope.row)">已推迟</a>
+                            <span v-else>{{parseState(scope.row.flowStateId)}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="serial" label="系统订单号" width="150">
@@ -84,14 +89,11 @@
                             <span>{{parseDate(scope.row.orderDate)}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="deliveryDate" label="交付日期" width="100">
+                    <el-table-column prop="deliveryDate" label="交付日期" width="120">
                         <template slot-scope="scope">
                             <span>{{parseDate(scope.row.deliveryDate)}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="updateDate" label="最后更新" width="100">
-                        <template slot-scope="scope">
-                            <span>{{parseDate(scope.row.updateDate)}}</span>
+                            <el-button v-if="scope.row.isDelay" type="text" icon="el-icon-edit" style="margin-left:10px" @click="editDate(scope.row)"
+                            />
                         </template>
                     </el-table-column>
                     <el-table-column prop="updateByUser" label="操作人" width="80">
@@ -104,12 +106,21 @@
             <div class="page-container" style="padding: 10px 0;">
                 <div>
                     <span style="margin-right:15px;">共计{{total}}个出库送货的订单</span>
+                    <el-button type="primary" size="mini" :disabled="!this.selectSourceserial.length" @click="handleDelay(null)">批量处理送货</el-button>
                 </div>
                 <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
                     :page-sizes="[20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
                 </el-pagination>
             </div>
         </div>
+
+        <el-dialog title="修改交货日期" append-to-body :visible.sync="editVisible" width="300px" @close="editRow=null">
+            <div v-if="editRow">
+                <el-date-picker size="mini" value-format="timestamp" v-model="editRow.deliveryDate" type="date" :clearable="false" placeholder="选择日期"
+                    style="width:150px;" />
+                <el-button size="mini" type="primary" style="margin-left:10px" @click="changeDate">确定</el-button>
+            </div>
+        </el-dialog>
 
     </section>
 </template>
@@ -125,9 +136,10 @@ export default {
             gridList: [],
             query: {
                 page: 1,
-                pagesize: 100
+                pagesize: 500
             },
             searchForm: {
+                isDelay: false,
                 serial: '',
                 sourceserial: '',
                 projectNo: '',
@@ -142,9 +154,77 @@ export default {
             exportOrderIds: [],
             updateIds: [],
             isCanExport: false,
+            editVisible: false,
+            editRow: null,
+            selectSourceserial: [],
         }
     },
     methods: {
+        checkSelectable(item) {
+            return item.isDelay;
+        },
+        handleSelectionChange(rows) {
+            this.selectSourceserial = [];
+            if (rows.length) {
+                rows.forEach(item => {
+                    this.selectSourceserial.push(item.sourceserial);
+                })
+            }
+        },
+        // 修改交货日期
+        editDate(row) {
+            this.editVisible = true;
+            this.editRow = _.cloneDeep(row);
+        },
+        changeDate() {
+            let params = {
+                type: 'updateData',
+                collectionName: 'order',
+                multi: true,
+                condition: {
+                    "sourceserial": this.editRow.sourceserial
+                },
+                data: {
+                    "deliveryDate": this.editRow.deliveryDate
+                }
+            };
+            this.$axios.$post('mock/db', { data: params }).then(result => {
+                let index = _.findIndex(this.gridList, { "id": this.editRow.id });
+                this.$set(this.gridList, index, { ...this.editRow });
+                this.editRow = null;
+                this.editVisible = false;
+            });
+        },
+        handleDelay(item) {
+            this.$confirm('确定已送货?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                let sourceserial = item ? [item.sourceserial] : this.selectSourceserial;
+                let condition = {
+                    type: 'updatePatch',
+                    collectionName: 'order',
+                    param: { "sourceserial": { $in: sourceserial } },
+                    set: {
+                        $set: {
+                            'isDelay': false
+                        }
+                    }
+                }
+                this.$axios.$post("mock/db", { data: condition }).then(result => {
+                    this.$message.success("已完成送货");
+                    sourceserial.forEach(serial => {
+                        let index = _.findIndex(this.gridList, { "sourceserial": serial });
+                        if (!!~index) {
+                            let row = this.gridList[index];
+                            row.isDelay = false;
+                            this.$set(this.gridList, index, { ...row });
+                        }
+                    })
+                });
+            }).catch(() => { });
+        },
         setOrderParams(flag) {
             this.needSource = flag;
             this.query.page = 1;
@@ -176,6 +256,8 @@ export default {
                             $gte: this.searchForm[k][0],
                             $lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
                         }
+                    } else if (_.isBoolean(this.searchForm[k])) {
+                        params[k] = this.searchForm[k];
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] }
                     } else {
@@ -224,27 +306,17 @@ export default {
                         "$group": {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
+                            "isDelay": { "$first": "$isDelay" },
                             "serial": { "$first": "$serial" },
                             "sourceserial": { "$first": "$sourceserial" },
                             "projectNo": { "$first": "$projectNo" },
                             "projectName": { "$first": "$projectName" },
                             "model": { "$first": "$model" },
                             "modelNo": { "$first": "$modelNo" },
-                            /* "materialNo":{"$first" :"$materialNo"},
-							"productId":{"$first" :"$productId"},
-							"productName":{"$first" :"$productName"},
-							"crmId":{"$first" :"$crmId"},
-							"crmName":{"$first" :"$crmName"},
-							"boxNo":{"$first" :"$boxNo"},
-							"caselNo":{"$first" :"$caselNo"},
-							"util":{"$first" :"$util"},
-							"price":{"$first" :"$price"},
-							"count":{"$first" :"$count"}, */
                             "orderDate": { "$first": "$orderDate" },
                             "deliveryDate": { "$first": "$deliveryDate" },
                             "updateDate": { "$first": "$updateDate" },
                             "updateByUser": { "$first": "$updateByUser" },
-                            //"content":{"$first" :"$content"},
                             "flowStateId": { "$first": "$flowStateId" },
                             "total": { $sum: 1 },
                             "result": { "$push": "$$ROOT" }
@@ -264,7 +336,7 @@ export default {
                             preserveNullAndEmptyArrays: true // 空的数组也拆分
                         }
                     },
-                    { $sort: { deliveryDate: 1 } },
+                    { $sort: { deliveryDate: 1, isDelay: -1 } },
                     { $skip: (this.query.page - 1) * this.query.pagesize },
                     { $limit: this.query.pagesize }
                 ]

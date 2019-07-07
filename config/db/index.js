@@ -398,6 +398,11 @@ module.exports = {
                 default: 0,
                 label: '业务类型' // 售后或项目等
             },
+            isDelay: {
+                type: Boolean,
+                default: false,
+                label: '推迟送货'
+            },
             isCanceled: {
                 type: Boolean,
                 default: false,
