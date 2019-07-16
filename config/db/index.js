@@ -1,5 +1,5 @@
 module.exports = {
-    dbConect: { "dataUrl": "127.0.0.1", "dataPort": "27017", "dataName": "juehe", "username": "", "password": "" }, //47.91.231.119
+    dbConect: { "dataUrl": "127.0.0.1", "dataPort": "27017", "dataName": "jueheNew", "username": "", "password": "" }, //47.91.231.119
     /*----------数据表Collections-----------*/
     collectionList: [
         { "name": "用户列表", "colname": "user" }
@@ -398,6 +398,11 @@ module.exports = {
                 default: 0,
                 label: '业务类型' // 售后或项目等
             },
+            isDelay: {
+                type: Boolean,
+                default: false,
+                label: '推迟送货'
+            },
             isCanceled: {
                 type: Boolean,
                 default: false,
@@ -752,6 +757,11 @@ module.exports = {
                 type: String,
                 default: '',
                 label: '物料号'
+            },
+            projectNo: {
+                type: String,
+                default: '',
+                label: '项目号'
             },
             projectName: {
                 type: String,

@@ -10,18 +10,23 @@
 				<el-form :inline="true" :model="tableForm" ref="tableForm" size="mini" v-if="sourceData.length">
 					<el-form-item label="订单类型：">
 						<el-select v-model="tableForm.typeId" placeholder="请选择" clearable @change="filterByForm">
-							<el-option v-for="types in setting.type" :key="types.id" :label="types.name" :value="types.id" />
+							<el-option v-for="types in setting.type" :key="types.id" :label="types.name"
+								:value="types.id" />
 						</el-select>
 					</el-form-item>
 					<el-form-item label="模糊筛选：">
 						<el-input v-model="tableForm.keyword" placeholder="请输入关键字" clearable @change="filterByForm" />
 					</el-form-item>
 					<el-form-item>
-						<el-button type="warning" @click="filterByForm" v-if="tableData.length" icon="el-icon-search">查找</el-button>
-						<el-button type="primary" @click="saveTable" v-if="tableData.length" :loading="uploading" icon="my-icon-save">导入订单({{tableData.length}})</el-button>
+						<el-button type="warning" @click="filterByForm" v-if="tableData.length" icon="el-icon-search">查找
+						</el-button>
+						<el-button type="primary" @click="saveTable" v-if="tableData.length" :loading="uploading"
+							icon="my-icon-save">导入订单({{tableData.length}})</el-button>
 						<el-button type @click="sourceData=[]" icon="el-icon-refresh">重新上传</el-button>
-						<el-button type @click="removeRepeat" v-if="repeatCount">删除重复梯号、项目号的订单(共：{{repeatCount}})</el-button>
-						<el-button type @click="openDialogNotin=true" v-if="notInList.length" :disabled="openDialogNotin">显示无法匹配元数据的订单(共：{{notInList.length}})</el-button>
+						<el-button type @click="removeRepeat" v-if="repeatCount">删除重复梯号、项目号的订单(共：{{repeatCount}})
+						</el-button>
+						<el-button type @click="openDialogNotin=true" v-if="notInList.length"
+							:disabled="openDialogNotin">显示无法匹配元数据的订单(共：{{notInList.length}})</el-button>
 					</el-form-item>
 				</el-form>
 				<upload-excel-component v-else size="mini" :on-success="handleSuccess" :before-upload="beforeUpload" />
@@ -29,7 +34,9 @@
 			<div v-if="uploading">正在导入订单中，请等待处理完成...</div>
 			<!--批量导入-->
 			<div v-if="sourceData.length">
-				<el-table size="mini" ref="listTable" :data="tableData.slice((queryUpload.page-1)*queryUpload.pagesize, queryUpload.page*queryUpload.pagesize)" border highlight-current-row fit stripe max-height="500" v-loading="uploading">
+				<el-table size="mini" ref="listTable"
+					:data="tableData.slice((queryUpload.page-1)*queryUpload.pagesize, queryUpload.page*queryUpload.pagesize)"
+					border highlight-current-row fit stripe max-height="500" v-loading="uploading">
 					<el-table-column type="expand">
 						<template slot-scope="props">
 							<el-row :gutter="20">
@@ -53,12 +60,13 @@
 						</template>
 					</el-table-column>
 					<!--订单数据列表-->
-					<el-table-column v-for="item of tableKeys.filter(o=>o.show)" :prop="item.value" :label="item.label" :key="item.value" :width="item.width">
+					<el-table-column v-for="item of tableKeys.filter(o=>o.show)" :prop="item.value" :label="item.label"
+						:key="item.value" :width="item.width">
 						<template slot-scope="scope">
 							<div class="row-list" :title="scope.row[item.value]">
 								<span>{{parseStr(scope.row,item.value)}}</span>
 								<span v-if="item.value==='metaprice'&&!scope.row.notin" style="margin-left:5px;">
-									<el-button type="text" icon="el-icon-edit" @click="editPrice(scope.row)"/>
+									<el-button type="text" icon="el-icon-edit" @click="editPrice(scope.row)" />
 								</span>
 							</div>
 						</template>
@@ -66,7 +74,8 @@
 					<el-table-column label="操作" fixed="right" align="center" width="100">
 						<template slot-scope="scope">
 							<el-button size="mini" type="text" @click="handleDelete(scope.row)">移除</el-button>
-							<el-button size="mini" type="text" v-if="scope.row.notin" @click="handleEdit(scope.row)">编辑</el-button>
+							<el-button size="mini" type="text" v-if="scope.row.notin" @click="handleEdit(scope.row)">编辑
+							</el-button>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -75,7 +84,10 @@
 						<span v-if="tableForm.typeId">订单类型：{{parseStr(tableForm,'typeId')}}；</span>
 						<span v-if="tableForm.keyword">模糊查询：{{parseStr(tableForm,'keyword')}}</span>
 					</div>
-					<el-pagination size="mini" @size-change="uploadSizeChange" @current-change="uploadCurrentChange" :current-page.sync="queryUpload.page" :page-sizes="[20, 50, 100, 200, 500]" :page-size="queryUpload.pagesize" layout="total,sizes, prev, pager, next" :total="uploadTotal"></el-pagination>
+					<el-pagination size="mini" @size-change="uploadSizeChange" @current-change="uploadCurrentChange"
+						:current-page.sync="queryUpload.page" :page-sizes="[20, 50, 100, 200, 500]"
+						:page-size="queryUpload.pagesize" layout="total,sizes, prev, pager, next" :total="uploadTotal">
+					</el-pagination>
 				</div>
 			</div>
 		</div>
@@ -98,7 +110,8 @@
 				<el-table-column label="单价" prop="price" width="100" />
 				<el-table-column label="操作" fixed="right" align="center" width="100">
 					<template slot-scope="scope">
-						<el-button size="mini" type="text" @click="handleEdit(scope.row)" v-if="scope.row.notin">加入产品</el-button>
+						<el-button size="mini" type="text" @click="handleEdit(scope.row)" v-if="scope.row.notin">加入产品
+						</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -108,7 +121,8 @@
 		</el-dialog>
 		<el-dialog title="编辑订单单价" :visible.sync="editDialogVisible" append-to-body width="200px">
 			<div>
-				<el-input-number size="mini" v-if="editRow" v-model="editRow.metaprice" controls-position="right" :min="0" style="width:100%"/>
+				<el-input-number size="mini" v-if="editRow" v-model="editRow.metaprice" controls-position="right"
+					:min="0" style="width:100%" />
 			</div>
 			<span slot="footer" class="dialog-footer">
 				<el-button size="mini" @click="editDialogVisible = false">取 消</el-button>
@@ -181,11 +195,11 @@ export default {
 		};
 	},
 	methods: {
-		editPrice(row){
+		editPrice(row) {
 			this.editRow = row;
 			this.editDialogVisible = true;
 		},
-		updatePrice(){
+		updatePrice() {
 			this.editDialogVisible = false;
 			// 更新元数据单价
 			let condition = {
@@ -197,10 +211,10 @@ export default {
 					price: this.editRow.metaprice
 				}
 			};
-			this.$axios.$post('mock/db', { data: condition }).then(res=>{
+			this.$axios.$post('mock/db', { data: condition }).then(res => {
 				console.log('handleChangePrice', this.editRow, res);
-				this.sourceData.forEach(item=>{
-					if(item.crmId == this.editRow.crmId && item.typeId == this.editRow.typeId && item.materialNo == this.editRow.materialNo){
+				this.sourceData.forEach(item => {
+					if (item.crmId == this.editRow.crmId && item.typeId == this.editRow.typeId && item.materialNo == this.editRow.materialNo) {
 						item.metaprice = this.editRow.metaprice;
 					}
 				});
@@ -371,18 +385,16 @@ export default {
 				confirmButtonText: "确定",
 				cancelButtonText: "取消",
 				type: "warning"
-			})
-				.then(() => {
-					let index = _.findIndex(this.sourceData, { index: row.index });
-					this.sourceData.splice(index, 1);
-					this.tableData = _.cloneDeep(this.sourceData);
-					this.uploadTotal = this.tableData.length;
-					this.$message({
-						type: "success",
-						message: "删除成功!"
-					});
-				})
-				.catch(() => { });
+			}).then(() => {
+				let index = _.findIndex(this.sourceData, { index: row.index });
+				this.sourceData.splice(index, 1);
+				this.tableData = _.cloneDeep(this.sourceData);
+				this.uploadTotal = this.tableData.length;
+				this.$message({
+					type: "success",
+					message: "删除成功!"
+				});
+			}).catch(() => { });
 		},
 		checkSerial(index) {
 			let now = moment(new Date()).format("YYYY-MM-DD HH:mm");
@@ -402,7 +414,7 @@ export default {
 			this.uploadRepeatCount = 0;
 			let listData = [];
 			results.forEach((item, index) => {
-				if(item['订单编号']){
+				if (item['订单编号']) {
 					this.lastUploadId++;
 					let obj = {
 						index: index + 1,
@@ -447,14 +459,13 @@ export default {
 					// 匹配产品分类和产品ID
 					let product = _.find(this.productList, {
 						name: obj.productName,
-                        materialNo: obj.materialNo,
-                        //modelNo:obj.modelNo,
+						materialNo: obj.materialNo,
 						typeId: obj.typeId
 					});
 					//debugger
 					if (product) {
 						let crm = _.find(this.setting.crm, { id: product.crmId });
-						if(crm){
+						if (crm) {
 							if (_.findIndex(this.crmList, { id: product.crmId }) < 0) {
 								this.crmList.push(crm);
 							}
@@ -465,7 +476,7 @@ export default {
 								crmId: product.crmId,
 								crmName: crm.name
 							});
-						}else{
+						} else {
 							obj.notin = true;
 							this.notInList.push(obj);
 						}
@@ -489,7 +500,8 @@ export default {
 			this.uploading = false;
 		},
 		checkModelNo(row) {
-			if (_.find(this.modelNoList, {sourceserial: row.sourceserial, deliveryDate: row.deliveryDate, materialNo: row.materialNo})) {
+            if (_.find(this.modelNoList, { sourceserial: row.sourceserial, deliveryDate: row.deliveryDate, materialNo: row.materialNo })) {
+                debugger
 				return true;
 			}
 			return false;
@@ -502,7 +514,7 @@ export default {
 		},
 		saveTable() {
 			if (this.uploadRepeatCount > 0) {
-				this.$alert("有" + this.uploadRepeatCount + "个重复的梯号和项目号的订单，请清理后再提交保存！");
+				this.$alert("有" + this.uploadRepeatCount + "个重复的订单、物料、交货日期的订单，请清理后再提交保存！");
 				return;
 			}
 			// 检查订单的完善
@@ -549,12 +561,12 @@ export default {
 				this.lastId++;
 				index++;
 				item.id = this.lastId;
-                item.serial = this.checkSerial(index);
-                if(/^91/.test(item.sourceserial)){ // 是否为售后类型
-                    item.business = 1;
-                }else if(/^45/.test(item.sourceserial)){
-                    item.business = 2;
-                }
+				item.serial = this.checkSerial(index);
+				if (/^91/.test(item.sourceserial)) { // 是否为售后类型
+					item.business = 1;
+				} else if (/^45/.test(item.sourceserial)) {
+					item.business = 2;
+				}
 				delete item.index;
 				dataList.push(item);
 			});
@@ -564,16 +576,16 @@ export default {
 				collectionName: "order",
 				notNotice: true,
 				data: dataList
-            };
-            let epList = dataList.filter(o=>{
-                return o.id === '' || !o.id || !o.crmId;
-            })
-            //debugger
-            if(epList.length){
-                loadingMask.close();
-                this.$message.error('数据解析出问题了，请联系管理员');
-                return
-            }
+			};
+			let epList = dataList.filter(o => {
+				return o.id === '' || !o.id || !o.crmId;
+			})
+			//debugger
+			if (epList.length) {
+				loadingMask.close();
+				this.$message.error('数据解析出问题了，请联系管理员');
+				return
+			}
 			// 订单保存
 			this.$axios.$post("mock/db", { data: condition }).then(result => {
 				loadingMask.close();
@@ -584,12 +596,13 @@ export default {
 		// 获取10天内所有已经导入的订单列表,列出物料号，交货日期,校验是否重复
 		async getModelNoList(match = {}) {
 			//let now = new Date();
-			let sd = new Date(new Date().setDate(new Date().getDate() - 9));
+			let sd = new Date(new Date().setDate(new Date().getDate() - 20));
 			let ed = new Date(new Date().setDate(new Date().getDate() + 1));
 			let params = {
 				type: "getColumns",
 				collectionName: "order",
 				condition: {
+					flowStateId: { $lt: 10 },
 					updateDate: { $gte: sd.getTime(), $lte: ed.getTime() }
 				},
 				cols: {
@@ -601,8 +614,8 @@ export default {
 					deliveryDate: 1
 				}
 			};
-			let result = await this.$axios.$post("mock/db", { data: params });
-			//console.log("getModelNoList", result);
+            let result = await this.$axios.$post("mock/db", { data: params });
+            console.log('getModelNoList', result)
 			this.modelNoList = result;
 		},
 		async _getLastId() {
@@ -657,77 +670,77 @@ export default {
 
 <style lang="scss" scoped>
 .upload-container {
-  display: flex;
-  align-item: center;
+	display: flex;
+	align-item: center;
 }
 .page-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .row-list {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  &.warning {
-    color: red;
-  }
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	&.warning {
+		color: red;
+	}
 }
 /deep/ .el-table {
-  .cell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    > i {
-      font-size: 14px;
-      color: #eee;
-      margin-right: 5px;
-      &.payed {
-        color: green;
-      }
-    }
-    .el-button {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-    }
-  }
-  .warning {
-    color: red;
-  }
-  /deep/ .el-table__expanded-cell {
-    padding: 20px;
-    .el-row {
-      border-bottom: 1px solid #ddd;
-      &:last-child {
-        border: 0;
-      }
+	.cell {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		> i {
+			font-size: 14px;
+			color: #eee;
+			margin-right: 5px;
+			&.payed {
+				color: green;
+			}
+		}
+		.el-button {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 100%;
+		}
+	}
+	.warning {
+		color: red;
+	}
+	/deep/ .el-table__expanded-cell {
+		padding: 20px;
+		.el-row {
+			border-bottom: 1px solid #ddd;
+			&:last-child {
+				border: 0;
+			}
 
-      .el-col {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        line-height: 25px;
+			.el-col {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				line-height: 25px;
 
-        > span {
-          &:first-child {
-            width: 80px;
-            display: inline-block;
-            font-weight: bold;
-          }
-        }
-      }
-    }
-    .el-form-item {
-      width: 32%;
-      margin: 0;
-      .el-form-item__label {
-        font-weight: bold;
-      }
-    }
-  }
+				> span {
+					&:first-child {
+						width: 80px;
+						display: inline-block;
+						font-weight: bold;
+					}
+				}
+			}
+		}
+		.el-form-item {
+			width: 32%;
+			margin: 0;
+			.el-form-item__label {
+				font-weight: bold;
+			}
+		}
+	}
 }
 </style>
 

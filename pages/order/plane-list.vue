@@ -37,9 +37,9 @@
 					</template>
 				</el-table-column>
                 <el-table-column prop="projectName" label="项目名称"/>
-				<el-table-column prop="projectNo" label="项目号"  width="150"/>
+				<el-table-column prop="projectNo" label="项目号"  width="150" sortable />
                 <el-table-column prop="modelNo" label="梯号" width="80" />
-                <el-table-column prop="deliveryDate" label="交货日期" width="120">
+                <el-table-column prop="deliveryDate" label="交货日期" width="120" sortable>
 					<template slot-scope="scope">
 						<span>{{parseDate(scope.row.deliveryDate)}}</span>
 					</template>
@@ -134,7 +134,7 @@ export default {
 					}else if (_.isArray(this.searchForm[k]) && (k === 'deliveryDate' || k === 'orderDate')) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1] 
+							$lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
 						}
 					}else{
                         params[k] = { $regex: this.searchForm[k] };

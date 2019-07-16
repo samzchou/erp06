@@ -445,7 +445,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && k === "deliveryDate") {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lt: this.searchForm[k][1]
+							$lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
 						};
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] };

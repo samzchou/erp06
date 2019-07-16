@@ -5,7 +5,7 @@
   "author": "samzchou <samz_chou@163.com>",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch server",
+    "dev": "cross-env NODE_ENV=development nodemon node --max_old_space_size=4096 server/index.js --watch server",
     "build": "nuxt build",
     "start": "cross-env NODE_ENV=production node server/index.js",
     "generate": "nuxt generate"
@@ -19,7 +19,7 @@
     "consolidate": "^0.14.5",
     "cookie-parser": "^1.4.3",
     "crypto": "^1.0.1",
-    "element-ui": "^2.9.1",
+    "element-ui": "^2.10.0",
     "express": "^4.15.3",
     "file-saver": "^2.0.0",
     "good-storage": "^1.0.1",

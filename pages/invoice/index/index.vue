@@ -40,7 +40,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column type="selection" width="50" align="center" />
-				<el-table-column prop="serial" label="系统订单号" width="90">
+				<el-table-column prop="serial" label="系统订单号" width="120">
 					<template slot-scope="scope">
 						<span>{{scope.row.serial}}</span>
 					</template>
@@ -51,7 +51,7 @@
 					</template>
 				</el-table-column>
                 <!-- <el-table-column prop="boxNo" label="箱号" width="70" /> -->
-				<el-table-column prop="projectNo" label="项目号" width="120" />
+				<el-table-column prop="projectNo" label="项目号" width="130" sortable />
 				<el-table-column prop="projectName" label="项目名称" />
 				<el-table-column prop="total" label="订单总数" width="80">
 					<template slot-scope="scope">
@@ -80,12 +80,12 @@
 						<span>{{scope.row.orderTotalPrice | currency}}</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="orderDate" label="制单日期" width="100">
+				<el-table-column prop="orderDate" label="制单日期" width="100" sortable>
 					<template slot-scope="scope">
 						<span>{{parseDate(scope.row.orderDate)}}</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="deliveryDate" label="交付日期" width="100">
+				<el-table-column prop="deliveryDate" label="交付日期" width="100" sortable>
 					<template slot-scope="scope">
 						<span>{{parseDate(scope.row.deliveryDate)}}</span>
 					</template>
@@ -99,7 +99,8 @@
 			</el-table>
 			<div class="page-container">
 				<div>
-					<span style="margin-right:15px;">共计{{total}}个已出库送货的订单，请选择开票</span>
+					<span style="margin-right:10px;">共计{{total}}个已出库送货的订单，请选择开票</span>
+                    <span style="margin-right:10px;color:red">已选总金额：{{invoiceMoney | currency}}</span>
 					<el-button size="mini" type="primary" @click="submitInvoice">开票</el-button>
 				</div>
 				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
@@ -192,7 +193,8 @@ export default {
 		},
 		payRules: {
 			invoiceNumber: [{ required: true, message: '请填写发票号或单据号', trigger: 'blur' }]
-		}
+        },
+        invoiceMoney:0,
 	}),
 	methods: {
 		splitSerial(serial) {
@@ -209,7 +211,15 @@ export default {
         },
 		handleSelectionChange(rows) {
 			this.selectRows = rows;
-			console.log(rows)
+            //console.log(rows)
+            this.invoiceMoney = 0;
+            rows.forEach(item=>{
+                this.invoiceMoney += item.orderTotalPrice;
+            });
+            if(this.invoiceMoney>100000){
+                this.$message.warning('总金额超过了10万')
+            }
+
         },
 		payOrder() {
 			this.$refs['payForm'].validate((valid) => {
@@ -299,7 +309,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && (k === 'orderDate' || k === 'deliveryDate')) {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1]
+							$lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
 						}
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] }

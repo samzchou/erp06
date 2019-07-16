@@ -25,7 +25,7 @@
 import {
 	mapState
 } from 'vuex';
-//import {appHeader,appAside} from './layout';
+//import {appHeader,appAside} from '~/layouts/layout';
 import appHeader from './app-header';
 import appAside from './app-aside';
 export default {

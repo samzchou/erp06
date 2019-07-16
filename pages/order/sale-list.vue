@@ -48,7 +48,8 @@
 					</template>
 				</el-table-column>
 				<el-table-column prop="crmName" label="供应商" />
-				<el-table-column prop="projectName" label="项目名称" />
+				<el-table-column prop="projectNo" label="项目号" width="150" />
+                <el-table-column prop="projectName" label="项目名称" />
 				<el-table-column prop="materialNo" label="物料号" width="120" />
 				<el-table-column prop="productName" label="订单产品名称">
 					<template slot-scope="scope">
@@ -433,7 +434,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && k === 'deliveryDate') {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1]
+							$lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
 						}
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] }
@@ -488,7 +489,8 @@ export default {
 							"crmName": { "$first": "$crmName" },
 							"productName": { "$first": "$productName" },
 							"materialNo": { "$first": "$materialNo" },
-							"projectName": { "$first": "$projectName" },
+                            "projectName": { "$first": "$projectName" },
+                            "projectNo": { "$first": "$projectNo" },
                             "finishedDate": { "$first": "$finishedDate" },
                             "deliveryDate": { "$first": "$deliveryDate" },
 							"total": { $sum: 1 }

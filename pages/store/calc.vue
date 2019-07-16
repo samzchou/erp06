@@ -243,7 +243,7 @@ export default {
 					} else if (_.isArray(this.searchForm[k]) && k === "updateDate") {
 						params[k] = {
 							$gte: this.searchForm[k][0],
-							$lte: this.searchForm[k][1]
+							$lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
 						};
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] };
@@ -319,8 +319,7 @@ export default {
 		async getBuys() {
 			let params = {
                 'flowStateId': { $in: [2, 6] }, //$in:[1,5] $lte:6 { $in: [2, 6] } {$gte:2,$lte:8}
-                'isCanceled':false,
-				//'dupdateDate': { $gte: new Date().getTime() - 24 * 3600 * 1000, $lte: new Date().getTime() + 24 * 3600 * 1000 * 10 } //deliveryDate
+                'isCanceled':false
 			};
 			let condition = {
 				type: "aggregate",
