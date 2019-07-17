@@ -76,7 +76,11 @@
                             <span>{{scope.row.sourceserial}}</span>
                         </template>
                     </el-table-column>
+<<<<<<< HEAD
                     <el-table-column prop="projectNo" label="项目号" width="150" sortable />
+=======
+                    <el-table-column prop="projectNo" label="项目号" width="150" />
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                     <el-table-column prop="projectName" label="项目名称" />
                     <el-table-column prop="modelNo" label="梯号" width="100" />
                     <el-table-column prop="total" label="订单总数" width="100">
@@ -84,12 +88,20 @@
                             <span>共 {{scope.row.total}} 套</span>
                         </template>
                     </el-table-column>
+<<<<<<< HEAD
                     <el-table-column prop="orderDate" label="制单日期" width="100" sortable>
+=======
+                    <el-table-column prop="orderDate" label="制单日期" width="100">
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                         <template slot-scope="scope">
                             <span>{{parseDate(scope.row.orderDate)}}</span>
                         </template>
                     </el-table-column>
+<<<<<<< HEAD
                     <el-table-column prop="deliveryDate" label="交付日期" width="120" sortable>
+=======
+                    <el-table-column prop="deliveryDate" label="交付日期" width="120">
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                         <template slot-scope="scope">
                             <span>{{parseDate(scope.row.deliveryDate)}}</span>
                             <el-button v-if="scope.row.isDelay" type="text" icon="el-icon-edit" style="margin-left:10px" @click="editDate(scope.row)"

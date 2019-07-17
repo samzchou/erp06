@@ -54,7 +54,10 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="crmName" label="供应商" width="150" />
+<<<<<<< HEAD
                  <el-table-column prop="projectNo" label="项目号" width="120" sortable />
+=======
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                 <el-table-column prop="projectName" label="项目名称" />
                 <el-table-column prop="materialNo" label="物料号" width="120" />
                 <el-table-column prop="productName" label="订单产品名称">
@@ -526,7 +529,10 @@ export default {
                             "crmName": { "$first": "$crmName" },
                             "productName": { "$first": "$productName" },
                             "materialNo": { "$first": "$materialNo" },
+<<<<<<< HEAD
                             "projectNo": { "$first": "$projectNo" },
+=======
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                             "projectName": { "$first": "$projectName" },
                             "createDate": { "$first": "$createDate" },
                             "finishedDate": { "$first": "$finishedDate" },

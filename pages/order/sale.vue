@@ -92,7 +92,10 @@
                         <span v-else>{{scope.row.serial}}</span>
                     </template>
                 </el-table-column>
+<<<<<<< HEAD
                 <el-table-column prop="projectNo" label="项目号" width="150" sortable />
+=======
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                 <el-table-column prop="projectName" label="项目名称" />
 
                 <el-table-column prop="count" label="订单合计数" width="100">
@@ -111,7 +114,11 @@
                         <span>{{parseDate(scope.row.orderDate)}}</span>
                     </template>
                 </el-table-column>
+<<<<<<< HEAD
                 <el-table-column prop="deliveryDate" label="交付日期" width="100" sortable>
+=======
+                <el-table-column prop="deliveryDate" label="交付日期" width="100">
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                     <template slot-scope="scope">
                         <span>{{parseDate(scope.row.deliveryDate)}}</span>
                     </template>
@@ -693,7 +700,10 @@ export default {
                         productName: item.productName,
                         materialNo: item.materialNo,
                         model: item.model,
+<<<<<<< HEAD
                         projectNo: item.projectNo,
+=======
+>>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                         projectName: item.projectName,
                         price: item.price,
                         metaprice: item.metaprice,
