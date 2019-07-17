@@ -48,13 +48,11 @@
 						<span>{{scope.$index+(query.page - 1) * query.pagesize + 1}} </span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="invoiceNumber" label="发票号" width="180" />
-				<el-table-column prop="id" label="详情" width="80">
-					<template slot-scope="scope">
-						<el-button type="text" @click="showDetail(scope.row)">查看详情</el-button>
-					</template>
+				<el-table-column prop="invoiceNumber" label="发票号" width="150" />
+
+				<el-table-column prop="crmName" label="客户" width="240">
+					<span>蒂森克虏伯电梯（上海）有限公司</span>
 				</el-table-column>
-				<el-table-column prop="crmName" label="客户" width="240" />
 				<el-table-column prop="createDate" label="开票日期" width="100">
 					<template slot-scope="scope">
 						<span>{{parseDate(scope.row.createDate)}}</span>
@@ -67,21 +65,27 @@
 				</el-table-column>
 				<el-table-column prop="slvMoney" label="税额" width="100">
 					<template slot-scope="scope">
-						<span>{{scope.row.slvMoney | currency}}</span>
+						<span>{{scope.row.slvMoney | currency("",4)}}</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="payPrice" label="开票金额" width="120">
 					<template slot-scope="scope">
-						<span>{{scope.row.payPrice | currency}}</span>
+						<span>{{scope.row.payPrice | currency("",4)}}</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="allPrice" label="总金额(含税)" width="120">
 					<template slot-scope="scope">
-						<span>{{scope.row.allPrice | currency}}</span>
+						<span>{{scope.row.allPrice | currency("",4)}}</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="createByUser" label="开票人" width="80" />
 				<el-table-column prop="content" label="备注" />
+				<el-table-column label="操作" width="170" align="center">
+					<template slot-scope="scope">
+						<el-button type="text" icon="el-icon-document" @click="showDetail(scope.row)">查看详情</el-button>
+						<el-button type="text" icon="el-icon-delete" @click="reInvoice(scope.row)">重新开票</el-button>
+					</template>
+				</el-table-column>
 			</el-table>
 			<div class="page-container">
 				<div>
@@ -150,6 +154,56 @@ export default {
 
 	}),
 	methods: {
+		// 重新删除并开票
+		reInvoice(row) {
+			this.$confirm('将删除该已开票数据并退回重新开票, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				console.log('reInvoice', row);
+				let orderIds = [];
+				row.result.forEach(item => {
+					orderIds = orderIds.concat(item.orderIds);
+				});
+                console.log('orderIds', orderIds);
+                //return;
+				// 更新原始订单状态
+				let condition = {
+					type: "updatePatch",
+					collectionName: "order",
+					param: { id: { $in: orderIds } },
+					set: {
+						$set: {
+							'isPayed': false,
+							'flowStateId': 10,
+							'updateByUser': this.$store.state.user.name,
+							'updateDate': new Date().getTime()
+						}
+					}
+				};
+				this.$axios.$post("mock/db", { data: condition }).then(result => {
+					if(result){
+                        // 删除已开票数据
+                        let cn = {
+                            type: 'removePatch',
+                            collectionName: 'finance',
+                            notNotice:true,
+                            data: { "invoiceNumber": row.invoiceNumber }
+                        };
+                        this.$axios.$post('mock/db', { data: cn }).then(res => {
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                            this.submitSearch(true);
+                        });
+                    }
+					
+				});
+
+			}).catch(() => { });
+		},
 		showDetail(row) {
 			let ids = this.getAllOrderIds([row]);
 			this.getOrders(ids).then(res => {
@@ -224,10 +278,10 @@ export default {
 				link.click();
 				window.URL.revokeObjectURL(link.href);
 				link.remove();
-                //console.log(xmlDocStr);
-                setTimeout(()=>{
-                    this.exportLoading = false;
-                },1500);
+				//console.log(xmlDocStr);
+				setTimeout(() => {
+					this.exportLoading = false;
+				}, 1500);
 			});
 
 			/* this.selectRows.forEach(item => {
@@ -482,8 +536,8 @@ export default {
 			this.total = result.total;
 			this.gridList = result.list.map(item => {
 				item.slv = this.dsCrm.slv;
-				item.slvMoney = item.allPrice * this.dsCrm.slv / 100;
-				item.payPrice = item.allPrice - item.slvMoney;
+				item.slvMoney = item.allPrice * this.dsCrm.slv / 100 / 1.13; // 税额
+				item.payPrice = item.allPrice - item.slvMoney; // 订单金额
 				return item;
 			});
 			//console.log('result', result);

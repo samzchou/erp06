@@ -31,6 +31,7 @@
                     <template slot-scope="scope">
                         <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
                             <el-col :span="4"><span style="width:30px">{{idx+1}}、</span>物料号：{{item.materialNo}}</el-col>
+                            <el-col :span="3">state：{{item.flowStateId}}</el-col>
                             <el-col :span="5">物料描述：{{item.productName}}</el-col>
                             <el-col :span="3">订单量：{{item.count}}</el-col>
                             <el-col :span="3">订单单价：{{item.price}}</el-col>
@@ -40,6 +41,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column type="selection" width="50" align="center" />
+                <el-table-column prop="flowStateId" label="sta" width="60" />
 				<el-table-column prop="serial" label="系统订单号" width="120">
 					<template slot-scope="scope">
 						<span>{{scope.row.serial}}</span>
@@ -50,6 +52,7 @@
 						<span>{{scope.row.sourceserial}}</span>
 					</template>
 				</el-table-column>
+                
                 <!-- <el-table-column prop="boxNo" label="箱号" width="70" /> -->
 				<el-table-column prop="projectNo" label="项目号" width="130" sortable />
 				<el-table-column prop="projectName" label="项目名称" />
@@ -65,19 +68,17 @@
 				</el-table-column>
                 <el-table-column prop="slvMoney" label="税额" width="100">
 					<template slot-scope="scope">
-						<span>{{scope.row.slvMoney | currency}}</span>
+						<span>{{scope.row.slvMoney | currency("",4)}}</span>
 					</template>
 				</el-table-column>
-
-                <el-table-column prop="orderMoney" label="订单金额" width="100">
+                <el-table-column prop="orderMoney" label="订单金额" width="120">
 					<template slot-scope="scope">
-						<span>{{scope.row.orderMoney | currency}}</span>
+						<span>{{scope.row.orderMoney | currency("",4)}}</span>
 					</template>
 				</el-table-column>
-
-				<el-table-column prop="orderTotalPrice" label="合计" width="100">
+				<el-table-column prop="orderTotalPrice" label="合计" width="120">
 					<template slot-scope="scope">
-						<span>{{scope.row.orderTotalPrice | currency}}</span>
+						<span>{{scope.row.orderTotalPrice | currency("",4)}}</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="orderDate" label="制单日期" width="100" sortable>
@@ -100,7 +101,7 @@
 			<div class="page-container">
 				<div>
 					<span style="margin-right:10px;">共计{{total}}个已出库送货的订单，请选择开票</span>
-                    <span style="margin-right:10px;color:red">已选总金额：{{invoiceMoney | currency}}</span>
+                    <span style="margin-right:10px;color:red">已选总金额：{{invoiceMoney | currency("",4)}}</span>
 					<el-button size="mini" type="primary" @click="submitInvoice">开票</el-button>
 				</div>
 				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
@@ -109,7 +110,7 @@
 		</div>
 		<el-dialog class="invoice-dialog" title="订单开票" :visible.sync="openDialogVisible" :close-on-click-modal="false" width="70%">
 			<div class="order-title" v-if="selectRows.length">
-				<div style="font-weight:bold">开票总额：{{allPrice | currency}}</div>
+				<div style="font-weight:bold">开票总额：{{allPrice | currency("",4)}}</div>
 				<div>
 					<el-form size="mini" :inline="true" :model="payForm" :rules="payRules" ref="payForm" class="pay-form">
 						<el-form-item label="发票号：" prop="invoiceNumber">
@@ -142,9 +143,9 @@
 						<span>共 {{scope.row.total}} 件</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="orderTotalPrice" label="订单合计" width="100">
+				<el-table-column prop="orderTotalPrice" label="订单合计" width="120">
 					<template slot-scope="scope">
-						<span>{{scope.row.orderTotalPrice | currency}}</span>
+						<span>{{scope.row.orderTotalPrice | currency("",4)}}</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="orderDate" label="制单日期" width="100">
@@ -207,7 +208,7 @@ export default {
         },
         
 		parseMoney(row){
-            return this.$options.filters['currency'](row.count*row.price);
+            return this.$options.filters['currency'](row.count*row.price,"",4);
         },
 		handleSelectionChange(rows) {
 			this.selectRows = rows;
@@ -224,7 +225,6 @@ export default {
 		payOrder() {
 			this.$refs['payForm'].validate((valid) => {
 				if (valid) {
-					
 					this.$confirm("确定为已选中的订单开票?", "提示", {
 						confirmButtonText: "确定",
 						cancelButtonText: "取消",
@@ -356,7 +356,8 @@ export default {
 							"_id": groupId, // 按字段分组
 							"id": { "$first": "$id" },
 							"serial": { "$first": "$serial" },
-							"sourceserial": { "$first": "$sourceserial" },
+                            "sourceserial": { "$first": "$sourceserial" },
+                            "flowStateId": { "$first": "$flowStateId" },
 							"projectNo": { "$first": "$projectNo" },
 							"projectName": { "$first": "$projectName" },
                             "productName": { "$first": "$productName" },
@@ -383,10 +384,10 @@ export default {
             let result = await this.$axios.$post('mock/db', { data: condition });
             //this.gridList = result.list;
 			this.total = result.total;
-			console.log(result)
+			//console.log(result)
 			this.gridList = result.list.map(item => {
-                item.slvMoney = item.orderTotalPrice * this.dsCrm.slv / 100;
-                item.orderMoney = item.orderTotalPrice - item.slvMoney;
+                item.slvMoney = item.orderTotalPrice * this.dsCrm.slv / 100 / 1.13; // 税额
+                item.orderMoney = item.orderTotalPrice - item.slvMoney; // 订单金额
 				return item;
 			});
 			this.listLoading = false;
