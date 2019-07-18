@@ -102,7 +102,7 @@
 				<div>
 					<span style="margin-right:10px;">共计{{total}}个已出库送货的订单，请选择开票</span>
                     <span style="margin-right:10px;color:red">已选总金额：{{invoiceMoney | currency("",4)}}</span>
-					<el-button size="mini" type="primary" @click="submitInvoice" :disabled="invoiceDisabled">开票</el-button>
+					<el-button size="mini" type="primary" @click="submitInvoice" :disabled="invoiceDisabled || !selectRows.length">开票</el-button>
 				</div>
 				<el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total">
 				</el-pagination>

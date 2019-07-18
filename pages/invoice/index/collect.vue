@@ -83,7 +83,7 @@ export default {
                         order.revenueNo = this.dsCrm.revenueNo;
                         order.bank = this.dsCrm.bank;
                         order.address = this.dsCrm.address;
-                        order.slvMonry = (order.count * order.price * this.dsCrm.slv/100).toFixed(2);
+                        order.slvMonry = (order.count * order.price * this.dsCrm.slv/100/1.13).toFixed(2);
                         order.allPrice = (order.count * order.price - order.slvMonry).toFixed(2);
                         order.slv = this.dsCrm.slv/100;
                         num++;
@@ -124,8 +124,8 @@ export default {
                     "num":num,
 					"createDate": item.createDate,
 					"invoiceNumber": item.invoiceNumber,
-					"allPrice": item.price - item.price * this.dsCrm.slv / 100,
-					"slvMoney": item.price * this.dsCrm.slv / 100,
+					"allPrice": item.price - item.price * this.dsCrm.slv / 100 / 1.13,
+					"slvMoney": item.price * this.dsCrm.slv / 100 / 1.13,
 					"price": item.price,
 					"sourceserial": item.sourceserial,
                 }

@@ -92,11 +92,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="projectName" label="项目名称" />
-<<<<<<< HEAD
                 <el-table-column prop="projectNo" label="项目号" sortable />
-=======
-                <el-table-column prop="projectNo" label="项目号" />
->>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                 <el-table-column prop="count" label="订单合计数" width="100">
                     <template slot-scope="scope">
                         <span v-if="needSource">{{scope.row.total}} 套</span>
@@ -114,11 +110,7 @@
                         <span>{{parseDate(scope.row.orderDate)}}</span>
                     </template>
                 </el-table-column>
-<<<<<<< HEAD
                 <el-table-column prop="deliveryDate" label="交付日期" width="100" sortable >
-=======
-                <el-table-column prop="deliveryDate" label="交付日期" width="100">
->>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                     <template slot-scope="scope">
                         <span>{{parseDate(scope.row.deliveryDate)}}</span>
                     </template>
@@ -277,10 +269,6 @@
                     </el-table-column>
                     <el-table-column prop="materialNo" label="物料号" width="120" />
                     <el-table-column prop="productName" label="物料名称" />
-<<<<<<< HEAD
-=======
-                    <!-- <el-table-column prop="model" label="梯型" width="70" /> -->
->>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                     <el-table-column prop="count" label="采购量" width="60" />
                     <el-table-column prop="storeCount" label="库存" width="60" />
                     <el-table-column label="已制单未入库参考" width="160">
@@ -721,10 +709,7 @@ export default {
                         productName: item.productName,
                         materialNo: item.materialNo,
                         model: item.model,
-<<<<<<< HEAD
                         projectNo: item.projectNo,
-=======
->>>>>>> 96229637a28dbc57d9f0dff1bdf2ca241d6b8a51
                         projectName: item.projectName,
                         price: item.price,
                         metaprice: item.metaprice,
