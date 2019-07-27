@@ -44,7 +44,7 @@
             </div>
             <div>
                 <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini"
-                    max-height="500" @selection-change="handleSelectionChange">
+                    max-height="500" @selection-change="handleSelectionChange" style="width:100%">
                     <el-table-column type="selection" width="50" align="center" />
                     <el-table-column type="index" width="70" align="center">
                         <template slot-scope="scope">
@@ -69,10 +69,10 @@
                             </el-row>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="materialNo" label="物料号" width="150" />
-                    <el-table-column prop="productName" label="物料描述" />
-                    <el-table-column prop="allcount" label="数量" width="70" />
-                    <el-table-column prop="crmName" label="供应商" width="250" />
+                    <el-table-column prop="sourceserial" label="订单号" width="150" />
+                    <el-table-column prop="projectNo" label="项目号" width="150" sortable />
+                    <el-table-column prop="projectName" label="项目名称" />
+                    <el-table-column prop="allcount" label="裴亮总数" width="100" />
                     <el-table-column prop="deliveryDate" label="交货日期" width="125" sortable>
                         <template slot-scope="scope">
                             <div>
@@ -200,9 +200,7 @@ export default {
 
             });
             console.log('deliveryDate', this.searchForm.deliveryDate)
-            /* console.log('exportData', exportData);
-            console.log('ids', ids); */
-            //return;
+
             import('@/components/Export2Excel').then(excel => {
                 const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
                 const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
@@ -214,7 +212,7 @@ export default {
                     data,
                     filename: '配料单-' + now
                 });
-                this.updateOrder(ids);
+                // this.updateOrder(ids);
             });
         },
         updateOrder(ids) {
@@ -285,7 +283,7 @@ export default {
 
         async getList(match = {}) {
             this.listLoading = true;
-            let groupId = { "materialNo": "$materialNo" };
+            let groupId = { "projectNo": "$projectNo" };
             match = _.merge({ "isColled": this.isColled, "flowStateId": { $gte: 2, $lt: 4 }, "typeId": 1 }, match);
             //debugger
             let condition = {
@@ -305,9 +303,9 @@ export default {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
                             "business": { "$first": "$business" },
-                            "materialNo": { "$first": "$materialNo" },
-                            "crmName": { "$first": "$crmName" },
-                            "productName": { "$first": "$productName" },
+                            "projectNo": { "$first": "$projectNo" },
+                            "projectName": { "$first": "$projectName" },
+                            "sourceserial": { "$first": "$sourceserial" },
                             "deliveryDate": { "$first": "$deliveryDate" },
                             "allcount": { $sum: "$count" },
                             "result": { "$push": "$$ROOT" }

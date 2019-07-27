@@ -396,7 +396,7 @@ module.exports = {
             business: {
                 type: Number,
                 default: 0,
-                label: '业务类型' // 售后或项目等
+                label: '业务类型' // 1售后2项目
             },
             isDelay: {
                 type: Boolean,
