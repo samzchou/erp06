@@ -38,9 +38,10 @@ export default {
             "label": "仓库",
             "icon": "recycle",
             "children": [
-                { "label": "配料单", "icon": "list-ul", "path": "/store/collocation" },
                 { "label": "采购订单入库", "icon": "list-ul", "path": "/store/in-buy" },
                 { "label": "生产订单入库", "icon": "list-ul", "path": "/store/in-sale" },
+                { "label": "制定配料单", "icon": "list-ul", "path": "/store/collocation" },
+                { "label": "已出配料单", "icon": "list-ul", "path": "/store/ingred" },
                 { "label": "库存清单明细", "icon": "list-ul", "path": "/store/calc-list" },
                 { "label": "库存盘点", "icon": "list-ul", "path": "/store/calc" },
                 { "label": "出库-送货单", "icon": "list-ul", "path": "/store/out" },

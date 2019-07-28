@@ -33,12 +33,13 @@ const dbFun = {
         };
     },
     async clearAll() {
-        await mongoDB['counters'].updateMany({ model: { $in: ['order', 'store', 'storeCalc', 'storeIn', 'storeLoss', 'finance'] } }, { $set: { "count": 0 } });
+        await mongoDB['counters'].updateMany({ model: { $in: ['order', 'store', 'storeCalc', 'storeIn', 'storeLoss', 'finance', 'ingred'] } }, { $set: { "count": 0 } });
         await mongoDB.order.deleteMany({});
         await mongoDB.store.deleteMany({});
         await mongoDB.storeCalc.deleteMany({});
         await mongoDB.storeIn.deleteMany({});
         await mongoDB.finance.deleteMany({});
+        await mongoDB.ingred.deleteMany({});
         return {
             success: true,
             response: {}

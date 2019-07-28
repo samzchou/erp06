@@ -61,18 +61,18 @@
                                     <span style="width:30px">{{idx+1}}、</span>
                                     <span>业务类型：{{parseBusiness(item.business)}}</span>
                                 </el-col>
-                                <el-col :span="4">蒂森订单：{{item.sourceserial}}</el-col>
-                                <el-col :span="4">项目号：{{item.projectNo}}</el-col>
-                                <el-col :span="5">项目名称：{{item.projectName}}</el-col>
-                                <el-col :span="2">数量：{{item.count}}</el-col>
-                                <el-col :span="4">交货日期：{{parseDate(item.deliveryDate)}}</el-col>
+                                <el-col :span="3">物料号：{{item.materialNo}}</el-col>
+                                <el-col :span="5">物料名称：{{item.productName}}</el-col>
+                                <el-col :span="3">数量：{{item.count}}</el-col>
+                                <el-col :span="3">单价：{{item.price}}</el-col>
+                                <el-col :span="6">供应商：{{item.crmName}}</el-col>
                             </el-row>
                         </template>
                     </el-table-column>
                     <el-table-column prop="sourceserial" label="订单号" width="150" />
                     <el-table-column prop="projectNo" label="项目号" width="150" sortable />
                     <el-table-column prop="projectName" label="项目名称" />
-                    <el-table-column prop="allcount" label="裴亮总数" width="100" />
+                    <el-table-column prop="allcount" label="配料总数" width="100" />
                     <el-table-column prop="deliveryDate" label="交货日期" width="125" sortable>
                         <template slot-scope="scope">
                             <div>
@@ -127,6 +127,8 @@ export default {
             exportLoading: false,
             editRow: null,
             storeArr: [],            // 库存列表
+            storeCalcLastId: 0,
+            lastIndetId: 0,
         }
     },
     methods: {
@@ -199,31 +201,69 @@ export default {
                 ids = _.concat(ids, res.ids);
 
             });
-            console.log('deliveryDate', this.searchForm.deliveryDate)
-
+            // console.log('deliveryDate', this.searchForm.deliveryDate)
             import('@/components/Export2Excel').then(excel => {
                 const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
                 const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
                 //debugger
                 const data = this.formatJson(filterVal, exportData);
-                const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDD');
+                const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDDhhmmss');
                 excel.export_json_to_excel({
                     header: tHeader,
                     data,
                     filename: '配料单-' + now
                 });
-                // this.updateOrder(ids);
+                // 加入配料单表
+                this.addIndet(ids, '配料单-' + now)
+                this.updateOrder(ids);
+            });
+        },
+        addIndet(ids, serial) {
+            this.lastIndetId++;
+            let condition = {
+                type: 'addData',
+                collectionName: 'ingred',
+                //notNotice: true,
+                data: {
+                    "id": this.lastIndetId,
+                    "serial": serial,
+                    "orderIds": ids,
+                    "createByUser": this.$store.state.user.name
+                }
+            };
+            this.$axios.$post('mock/db', { data: condition }).then(result => {
+                console.log('addIndet', result);
             });
         },
         updateOrder(ids) {
+            let cn = {
+                type: 'outStore',//'updatePatch',
+                collectionName: 'order',
+                notNotice: true,
+                data: { 'id': { $in: ids } },
+                set: { $set: { 'isColled': true, 'flowStateId': 4, 'updateByUser': this.$store.state.user.name } }
+            }
+            let updateData = [];
+            console.log('updateIds', ids);
+            /* console.log('updateIds', ids);
+            this.exportLoading = false;
+            return */
+            // 更新原始订单状态为已出库
+            this.$axios.$post('mock/db', { data: cn }).then(result => {
+                this.exportLoading = false;
+                this.addStoreCalc(result);
+                this.submitSearch(true);
+            });
+
             // 更新原始订单状态
-            let orderCondition = {
+            /* let orderCondition = {
                 type: "updatePatch",
                 collectionName: "order",
                 param: { id: { $in: ids } },
                 set: {
                     $set: {
-                        'isColled': true
+                        'isColled': true,
+                        'flowStateId':4
                     }
                 }
             };
@@ -233,7 +273,36 @@ export default {
             this.$axios.$post('mock/db', { data: orderCondition }).then(result => {
                 this.exportLoading = false;
                 this.submitSearch(true);
+            }); */
+        },
+        addStoreCalc(list) {
+            console.log('addStoreCalc', list);
+            debugger
+            let dataList = [];
+            list.forEach(item => {
+                //debugger
+                dataList.push({
+                    id: this.storeCalcLastId++,
+                    typeId: item.typeId,
+                    productName: item.productName,
+                    materialNo: item.materialNo,
+                    storeTypeId: 1, // 配料
+                    price: item.price,
+                    metaprice: item.metaprice,
+                    util: item.util,
+                    outcount: item.count,
+                    storeCount: item.storeCount - item.count,
+                    createByUser: this.$store.state.user.name
+                })
             });
+            //return;
+            let condition = {
+                type: 'addPatch',
+                collectionName: 'storeCalc',
+                data: dataList,
+                notNotice: true
+            };
+            this.$axios.$post('mock/db', { data: condition });
         },
 
         formatJson(filterVal, jsonData) {
@@ -284,7 +353,8 @@ export default {
         async getList(match = {}) {
             this.listLoading = true;
             let groupId = { "projectNo": "$projectNo" };
-            match = _.merge({ "isColled": this.isColled, "flowStateId": { $gte: 2, $lt: 4 }, "typeId": 1 }, match);
+            match = _.merge({ "isColled": this.isColled, "flowStateId": 3, "typeId": 1 }, match);
+            //match = _.merge({ "isColled": this.isColled, "flowStateId": { $gte: 2, $lt: 4 }, "typeId": 1 }, match);
             //debugger
             let condition = {
                 type: 'groupList',
@@ -326,11 +396,39 @@ export default {
                 });
                 return item;
             });
-            console.log('this.gridList', this.gridList);
+            //console.log('this.gridList', this.gridList);
             this.$nextTick(() => {
                 this.$refs.detailStore.toggleAllSelection();
                 this.listLoading = false;
             })
+        },
+        // 仓库待出库Id
+        async _getLastId() {
+            let cn = {
+                type: "getId",
+                data: {
+                    model: "storeCalc"
+                }
+            };
+            let res = await this.$axios.$post("mock/db", { data: cn });
+            if (res) {
+                this.storeCalcLastId = res;
+                console.log('storeCalcLastId', this.storeCalcLastId)
+            }
+        },
+        // 配料单Id
+        async _getingredId() {
+            let cn = {
+                type: "getId",
+                data: {
+                    model: "ingred"
+                }
+            };
+            let res = await this.$axios.$post("mock/db", { data: cn });
+            if (res) {
+                this.lastIndetId = res;
+                console.log('lastIndetId', this.lastIndetId);
+            }
         },
 
         async getSetting() {
@@ -348,6 +446,8 @@ export default {
     },
     created() {
         this.getSetting();
+        this._getLastId();
+        this._getingredId();
     },
     mounted() {
         this.getList();

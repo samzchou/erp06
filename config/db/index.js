@@ -682,6 +682,35 @@ module.exports = {
                 default: new Date().getTime()
             }
         },
+        /*----------配料单-----------*/
+        ingred: {
+            id: {
+                type: Number,
+                default: 0
+            },
+            serial: {
+                type: String,
+                default: ''
+            },
+            orderIds: {
+                type: Array,
+                default: [],
+                label: 'storeIn订单ID'
+            },
+            count: {
+                type: Number,
+                default: 0
+            },
+            createByUser: {
+                type: String,
+                default: ''
+            },
+            updateDate: {
+                type: Number,
+                default: new Date().getTime()
+            }
+        },
+
         /*----------仓库数据（待入库）-----------*/
         storeIn: {
             id: {
@@ -863,7 +892,7 @@ module.exports = {
             storeTypeId: {
                 type: Number,
                 default: 0,
-                label: '出入库类型ID'
+                label: '出入库类型ID' // 1:配料 2:送货
             },
             storeNoId: {
                 type: Number,

@@ -95,7 +95,11 @@ exports.storeCalc = connect.model('storeCalc', storeCalcScheme);
 var storeLossScheme = new Schema(dbServer.collections.storeLoss, { collection: 'storeLoss' });
 exports.storeLoss = connect.model('storeLoss', storeLossScheme);
 
-/*---------财务数据-----------*/
+/*---------配料单数据-----------*/
+var ingredScheme = new Schema(dbServer.collections.ingred, { collection: 'ingred' });
+exports.ingred = connect.model('ingred', ingredScheme);
+
+/*---------配料单-----------*/
 var financeScheme = new Schema(dbServer.collections.finance, { collection: 'finance' });
 exports.finance = connect.model('finance', financeScheme);
 
