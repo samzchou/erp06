@@ -42,14 +42,8 @@
             <div>
                 <el-table v-loading="listLoading" ref="detailStore" :data="gridList" border fit highlight-current-row stripe size="mini"
                     max-height="500" @selection-change="handleSelectionChange">
-                    <el-table-column type="selection" width="50" align="center" :selectable="checkSelectable" />
-                    <el-table-column prop="isDelay" label="推迟送货" align="center" width="80">
-                        <template slot-scope="scope">
-                            <span v-if="!scope.row.isDelay">正常</span>
-                            <span v-else style="color:blue">已推迟</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column type="index" width="50" align="center">
+                    <el-table-column type="selection" width="50" align="center" />
+                    <el-table-column type="index" width="50" label="序号" align="center">
                         <template slot-scope="scope">
                             <span>{{scope.$index+(query.page - 1) * query.pagesize + 1}} </span>
                         </template>
@@ -63,11 +57,17 @@
                                 </el-col>
                                 <el-col :span="3" :class="{'warning':item.isCanceled}">订单状态：{{item.isCanceled?'已取消':'正常'}}</el-col>
                                 <el-col :span="3">物料号：{{item.materialNo}}</el-col>
-                                <el-col :span="5">物料描述：{{item.productName}}</el-col>
+                                <el-col :span="6">物料描述：{{item.productName}}</el-col>
                                 <el-col :span="4">梯形/梯号：{{item.model}}/{{item.modelNo}}</el-col>
-                                <el-col :span="2">送货量：{{item.count}}</el-col>
-                                <el-col :span="3">库存可用量：{{item.storeCount}}</el-col>
+                                <el-col :span="2">数量：{{item.count}}</el-col>
+                                <!-- <el-col :span="3">库存可用量：{{item.storeCount}}</el-col> -->
                             </el-row>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="isDelay" label="推迟送货" align="center" width="80">
+                        <template slot-scope="scope">
+                            <span v-if="!scope.row.isDelay">正常</span>
+                            <span v-else style="color:blue">已推迟</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="serial" label="系统单号" width="150" />
@@ -83,14 +83,14 @@
                             <span>{{scope.row.total}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="finishCount" label="可送货量" width="80" />
-                    <el-table-column label="库存量计算" width="120">
+                    <!-- <el-table-column prop="finishCount" label="可送货量" width="80" /> -->
+                    <!-- <el-table-column label="库存量计算" width="120">
                         <template slot-scope="scope">
                             <div v-if="calcStore(scope.row.result) && !scope.row.isCanceled">
                                 <span class="warning">库存不足或未制单</span>
                             </div>
                         </template>
-                    </el-table-column>
+                    </el-table-column> -->
                     <el-table-column prop="orderDate" label="制单日期" width="100" sortable>
                         <template slot-scope="scope">
                             <span>{{parseDate(scope.row.orderDate)}}</span>
@@ -158,6 +158,7 @@
                 </el-row>
             </div>
             <el-table ref="exportTable" :data="orderList" border fit highlight-current-row stripe size="mini" max-height="350" style="width:100%">
+                <el-table-column type="index" label="序号" width="50" align="center" />
                 <el-table-column type="expand">
                     <template slot-scope="scope" v-if="scope.row.result && scope.row.result.length">
                         <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
@@ -172,7 +173,7 @@
                         </el-row>
                     </template>
                 </el-table-column>
-                <el-table-column type="index" width="50" align="center" />
+               
                 <el-table-column prop="projectName" label="项目名称" />
                 <el-table-column prop="projectNo" label="项目号" width="120" />
                 <el-table-column prop="modelNo" label="梯号" width="70" />
@@ -217,7 +218,7 @@ export default {
             gridList: [],
             query: {
                 page: 1,
-                pagesize: 500
+                pagesize: 100
             },
             searchForm: {
                 serial: '',
@@ -406,7 +407,6 @@ export default {
             import('@/components/Export2Excel').then(excel => {
                 const tHeader = ['项目名称', '项目号', '梯号', '订单号', '部件名称', '箱数', '交货日期', '备注'];
                 const filterVal = ['projectName', 'projectNo', 'modelNo', 'sourceserial', 'partName', 'boxCount', 'deliveryDate', 'boxContent'];
-                //debugger
                 const data = this.formatJson(filterVal, _.cloneDeep(this.orderList));
                 const now = moment(new Date()).format('YYYYMMDD');
                 let title = this.needSource ? '蒂森送货单' : '珏合送货单';
@@ -559,11 +559,11 @@ export default {
 
         async getList(match = {}) {
             this.listLoading = true;
-            let resStore = await this.$axios.$post("mock/db", { data: { type: "listData", collectionName: "store" } });
+            /* let resStore = await this.$axios.$post("mock/db", { data: { type: "listData", collectionName: "store" } });
             let storeArr = [];
             if (resStore) {
                 storeArr = resStore.list;
-            }
+            } */
             let groupId = { "sourceserial": "$sourceserial", "projectNo": "$projectNo" };
             let bySerial = { 'sourceserial': { $ne: '' } };
             if (!this.needSource) {
@@ -609,12 +609,12 @@ export default {
             let result = await this.$axios.$post('mock/db', { data: condition });
             this.total = result.total;
             this.gridList = result.list.map(item => {
-                let checkStore = this.getIsCanExport(item.result, storeArr);
-                item.finishCount = checkStore.finishCount;
-                item.finished = item.finishCount == item.total;
+                //let checkStore = this.getIsCanExport(item.result, storeArr);
+                //item.finishCount = checkStore.finishCount;
+                //item.finished = item.finishCount == item.total;
                 item.partName = "机房线槽总成";
                 item.boxCount = 1;
-                item.result = checkStore.list;
+                //item.result = checkStore.list;
                 return item;
             });
             console.log('this.gridList', this.gridList);

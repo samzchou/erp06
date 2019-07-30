@@ -14,6 +14,11 @@
 				<el-form-item label="项目名称：" prop="projectName">
 					<el-input v-model="searchForm.projectName" clearable style="width:150px" />
 				</el-form-item>
+                <el-form-item label="类型：" prop="types" clearable>
+                        <el-select v-model="searchForm.types" placeholder="请选择">
+                            <el-option v-for="item in typesArr" :key="item.value" :label="item.label" :value="item.value" />
+                        </el-select>
+                    </el-form-item>
 				<el-form-item label="制单日期：" prop="orderDate">
 					<el-date-picker v-model="searchForm.orderDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" clearable editable unlink-panels style="width:250px" />
 				</el-form-item>
@@ -41,7 +46,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column type="selection" width="50" align="center" />
-                <el-table-column prop="flowStateId" label="sta" width="60" />
 				<el-table-column prop="serial" label="系统订单号" width="120">
 					<template slot-scope="scope">
 						<span>{{scope.row.serial}}</span>
@@ -56,9 +60,10 @@
                 <!-- <el-table-column prop="boxNo" label="箱号" width="70" /> -->
 				<el-table-column prop="projectNo" label="项目号" width="130" sortable />
 				<el-table-column prop="projectName" label="项目名称" />
+                <el-table-column prop="boxNo" label="箱号" width="50" />
 				<el-table-column prop="total" label="订单总数" width="80">
 					<template slot-scope="scope">
-						<span>共 {{scope.row.total}} 件</span>
+						<span>{{scope.row.total}} 件</span>
 					</template>
 				</el-table-column>
                 <el-table-column label="税率" width="60">
@@ -76,7 +81,7 @@
 						<span>{{scope.row.orderMoney | currency("",4)}}</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="orderTotalPrice" label="合计" width="120">
+				<el-table-column prop="orderTotalPrice" label="合计" width="110">
 					<template slot-scope="scope">
 						<span>{{scope.row.orderTotalPrice | currency("",4)}}</span>
 					</template>
@@ -169,11 +174,13 @@ export default {
         setting: {},
         lastId:0,
         dsCrm:{},
+        typesArr:[{'label':'售后91000','value':'91000'},{'label':'9#-3','value':'9#-3'},{'label':'2#-6','value':'2#-6'}],
 		searchForm: {
 			serial: '',
 			sourceserial: '',
 			projectNo: '',
-			projectName: '',
+            projectName: '',
+            types:'',
 			orderDate: '',
 			deliveryDate: ''
 		},
@@ -218,8 +225,8 @@ export default {
             rows.forEach(item=>{
                 this.invoiceMoney += item.orderTotalPrice;
             });
-            if(this.invoiceMoney>100000){
-                this.$message.warning('总金额超过了10万');
+            if(this.invoiceMoney>113000){
+                this.$message.warning('总金额超过了113000元');
                 this.invoiceDisabled = true;
             }else{
                 this.invoiceDisabled = false;
@@ -318,7 +325,15 @@ export default {
 					} else if (_.isArray(this.searchForm[k])) {
 						params[k] = { $in: this.searchForm[k] }
 					} else {
-						params[k] = { $regex: this.searchForm[k] };
+						if(k == 'types'){
+                            if(this.searchForm[k] == '91000'){
+                                params['sourceserial'] = { $regex: this.searchForm[k] };
+                            }else{
+                                params['boxNo'] = this.searchForm[k];
+                            }
+                        }else{
+                            params[k] = { $regex: this.searchForm[k] };
+                        }
 					}
 				}
 			};

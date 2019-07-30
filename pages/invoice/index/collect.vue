@@ -72,9 +72,10 @@ export default {
 			}
         },
         setDetailData(list){
-            let arr = [], num = 1;
+            let arr = [], num = 1, totalAllprice=0,totalSlvMonry=0;
             list.forEach((item,idx)=>{
                 this.getOrders(item.orderIds).then(res=>{
+                    let orderAllPrice=0,orderSlvMonry=0;
                     res.forEach(order=>{
                         order.num = num;
                         order.crmName = this.dsCrm.name;
@@ -83,18 +84,31 @@ export default {
                         order.revenueNo = this.dsCrm.revenueNo;
                         order.bank = this.dsCrm.bank;
                         order.address = this.dsCrm.address;
-                        order.slvMonry = (order.count * order.price * this.dsCrm.slv/100/1.13).toFixed(2);
-                        order.allPrice = (order.count * order.price - order.slvMonry).toFixed(2);
+                        order.slvMonry = (order.count * order.price * this.dsCrm.slv/100/1.13).toFixed(4);
+                        order.allPrice = (order.count * order.price - order.slvMonry).toFixed(4);
                         order.slv = this.dsCrm.slv/100;
+                        orderAllPrice += order.count * order.price - order.slvMonry; //parseFloat(order.allPrice).toFixed(4);
+                        orderSlvMonry += order.count * order.price * this.dsCrm.slv/100/1.13; //parseFloat(order.slvMonry).toFixed(4);
                         num++;
                     })
+                    totalAllprice += orderAllPrice;
+                    totalSlvMonry += orderSlvMonry;
                     arr = _.concat(arr, res);
+                    arr.push({
+                        num:'小计',
+                        allPrice:orderAllPrice,
+                        slvMonry:orderSlvMonry
+                    });
                     if(idx == list.length-1){
+                        arr.push({
+                            num:'总计计',
+                            allPrice:totalAllprice,
+                            slvMonry:totalSlvMonry
+                        });
                         this.exportDetail(arr);
                     }
                 });
             });
-            
         },
         async getOrders(ids){
             let cn = {

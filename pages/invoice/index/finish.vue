@@ -5,18 +5,6 @@
 				<el-form-item label="发票号：" prop="invoiceNumber">
 					<el-input v-model="searchForm.invoiceNumber" clearable style="width:150px" />
 				</el-form-item>
-				<!-- <el-form-item label="系统订单号：" prop="serial">
-					<el-input v-model="searchForm.serial" clearable style="width:150px" />
-				</el-form-item>
-				<el-form-item label="蒂森订单号：" prop="sourceserial">
-					<el-input v-model="searchForm.sourceserial" clearable style="width:150px" />
-				</el-form-item>
-				<el-form-item label="项目号：" prop="projectNo">
-					<el-input v-model="searchForm.projectNo" clearable style="width:150px" />
-				</el-form-item>
-				<el-form-item label="项目名称：" prop="projectName">
-					<el-input v-model="searchForm.projectName" clearable style="width:150px" />
-				</el-form-item> -->
 				<el-form-item label="开票日期：" prop="createDate">
 					<el-date-picker v-model="searchForm.createDate" value-format="timestamp" type="daterange"
 						range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" clearable editable
@@ -440,7 +428,8 @@ export default {
 				slvMoney: allSlvMoney,
 				payPrice: allPayPrice,
 				allPrice: allTotal
-			});
+            });
+            //console.log('submitExport', arr);
 
 			import('@/components/Export2Excel').then(excel => {
 				const tHeader = ['开票日期', '开票人', '发票号', '税率', '税额', '开票金额', '总金额(含税)'];

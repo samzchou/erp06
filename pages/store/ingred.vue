@@ -54,6 +54,26 @@
                 </el-pagination>
             </div>
         </div>
+        <el-dialog :title="dialogTitle" append-to-body :close-on-click-modal="false" :visible.sync="dialogVisible" width="65%">
+            <el-table v-loading="detailLoading" ref="detailList" :data="detailList" border fit highlight-current-row stripe size="mini"
+                    max-height="500" style="width:100%">
+                <el-table-column label="序号" type="index" width="60" align="center" />
+                <el-table-column prop="materialNo" label="物料号" width="150" />
+                <el-table-column prop="productName" label="物料名称" />
+                <el-table-column prop="count" label="汇总数量" width="100"  />
+                <el-table-column prop="deliveryDate" label="交货日期" width="120" >
+                    <template slot-scope="scope">
+                        <div>
+                            <span>{{parseDate(scope.row.deliveryDate)}}</span>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div style="padding: 10px 0;text-align: right;">
+                <el-button size="small" type="primary" icon="el-icon-download">导出配料单</el-button>
+                <el-button size="small" icon="el-icon-close" @click="dialogVisible=false">取消关闭</el-button>
+            </div>
+        </el-dialog>
     </section>
 </template>
 
@@ -74,16 +94,52 @@ export default {
             },
             orderList: [],
             exportLoading: false,
+            dialogVisible:false,
+            detailLoading:false,
+            detailList:[],
+            dialogTitle:'',
         }
     },
     methods: {
         showDetail(row) {
-            console.log('showDetail', row);
+            this.dialogTitle = row.serial;
+            let params = {
+                type:'listData',
+                collectionName: 'order',
+                data:{
+                    id:{$in:row.orderIds}
+                }
+            }
+            this.$axios.$post('mock/db', {data:params}).then(res=>{
+                console.log('showDetail', row.orderIds, res);
+                this.setList(res.list);
+                
+            });
+            this.dialogVisible = true;
+        },
+        setList(list){
+            let arr = [];
+            list.forEach(item=>{
+                debugger
+                let orderIndex = _.findIndex(arr, {'materialNo':item.materialNo});
+                if(!~orderIndex){
+                    arr.push({
+                        "materialNo":item.materialNo,
+                        "productName": item.productName,
+                        "count": item.count,
+                        "deliveryDate": item.deliveryDate
+                    })
+                }else{
+                    arr[orderIndex]['count'] += item.count;
+                }
+            });
+            arr = _.sortBy(arr, ['productName']);
+            console.log('setList', arr);
+            this.detailList = arr;
         },
 
         exportTable() {
             this.exportLoading = true;
-            //console.log(this.orderList);
             let exportData = [], index = 1, ids = [];
             this.orderList.forEach(item => {
                 exportData.push({

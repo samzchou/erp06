@@ -57,8 +57,8 @@
                         <span :title="scope.row.sourceserial">{{scope.row.sourceserial}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="crmName" label="供应商" />
-                <el-table-column prop="productName" label="订单产品名称" width="150">
+                <el-table-column prop="crmName" label="供应商"  width="200" />
+                <el-table-column prop="productName" label="订单产品名称">
                     <template slot-scope="scope">
                         <span>{{scope.row.productName}}</span>
                         <span style="margin-left:5px; color:#CCC">等...</span>
@@ -74,6 +74,12 @@
                         <span>{{parseDate(scope.row.deliveryDate)}}</span>
                     </template>
                 </el-table-column>
+                <el-table-column v-if="isAdded" prop="createDate" label="入库日期" width="100">
+                    <template slot-scope="scope">
+                        <span>{{parseDate(scope.row.createDate)}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column v-if="isAdded" prop="createByUser" label="入库人" width="80" />
                 <el-table-column label="操作" fixed="right" align="center" width="70">
                     <template slot-scope="scope">
                         <div>
@@ -83,7 +89,9 @@
                 </el-table-column>
             </el-table>
             <div class="page-container">
-                <div>共有{{total}}个采购订单，请点击供应商名称查阅或操作订单</div>
+                <div>
+                    <span>共有{{total}}个采购订单，请点击供应商名称查阅或操作订单</span>
+                </div>
                 <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
                     :page-sizes="[20, 50, 100, 200,500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next" :total="total"
                 />
@@ -215,7 +223,7 @@ export default {
                 page: 1,
                 pagesize: 500
             },
-            queryInTotal: 0
+            queryInTotal: 0,
         };
     },
     methods: {
@@ -234,6 +242,55 @@ export default {
                 metaprice: row.metaprice
             })
         },
+
+        exportList(list){
+            let title = this.currItem.crmName + '入库明细';
+            let arr = [], allCount = 0, totalPrice=0;
+            list.forEach(item=>{
+                if(item.incount){
+                    arr.push({
+                        productName:item.productName,
+                        materialNo:item.materialNo,
+                        util:item.util,
+                        use:'',
+                        count:item.incount,
+                        metaprice:item.metaprice,
+                        allPrice:item.incount*item.metaprice,
+                        content:''
+                    });
+                    allCount += item.incount;
+                    totalPrice += item.incount*item.metaprice;
+                }
+            });
+            arr.push({
+                productName:'合计',
+                count:allCount,
+                allPrice:totalPrice
+            })
+
+            import('@/components/Export2Excel').then(excel => {
+                //debugger
+                const tHeader = ['物料名称', '物料号', '单位', '用途', '数量', '单价', '金额', '备注'];
+                const filterVal = ['productName', 'materialNo', 'util', 'use', 'count', 'metaprice', 'allPrice', 'content'];
+                const data = this.formatJson(filterVal, arr);
+                const now = moment(new Date()).format('YYYYMMDDhhmmss');
+                
+                excel.export_json_to_excel({
+                    header: tHeader,
+                    data,
+                    filename: title + '-' + now
+                });
+            });
+        },
+        formatJson(filterVal, jsonData) {
+            return jsonData.map(v => filterVal.map(j => {
+                if (j == 'deliveryDate' && v[j]) {
+                    v[j] = this.parseDate(v[j]);
+                }
+                return v[j];
+            }))
+        },
+
         updateStoreInData(data = {}) {
             let condition = {
                 type: 'updateData',
@@ -290,8 +347,9 @@ export default {
                     storeData.push(obj);
                 }
             });
-			/*  console.log('storeData', storeData)
-			 return; */
+            
+            this.exportList(storeData);
+
             if (!storeIds.length) {
                 this.$message.error("请选择需要入库的订单！");
                 return;
@@ -310,7 +368,7 @@ export default {
                     }
                 }
             };
-            console.log("inOrder", condition, storeData, orderIds);
+            //console.log("inOrder", condition, storeData, orderIds);
             /* debugger
             return; */
             this.$confirm("确定将所选采购订单入库, 是否继续?", "提示", {
@@ -516,10 +574,13 @@ export default {
                             sourceserial: { $first: "$sourceserial" },
                             crmId: { $first: "$crmId" },
                             crmName: { $first: "$crmName" },
+                            materialNo: { $first: "$materialNo" },
                             productName: { $first: "$productName" },
                             finishedDate: { $first: "$finishedDate" },
                             deliveryDate: { $first: "$deliveryDate" },
                             updateDate: { $first: "$updateDate" },
+                            createByUser: { $first: "$createByUser" },
+                            createDate: { $first: "$createDate" },
                             total: { $sum: 1 }
                         }
                     },

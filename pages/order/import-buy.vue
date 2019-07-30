@@ -146,7 +146,8 @@ export default {
 				{ label: "订单编号", value: "sourceserial", show: true },
 				{ label: "物料描述", value: "productName", show: true },
 				{ label: "物料号/版本号", value: "materialNo", show: true },
-				{ label: "项目号", value: "projectNo", show: true },
+                { label: "项目号", value: "projectNo", show: true },
+                { label: "细项号", value: "detailNumber", show: true},
 				{ label: "梯型", value: "model", width: 100 },
 				{ label: "梯号", value: "modelNo", width: 60 },
 				{ label: "数量", value: "count", width: 50 },
@@ -500,8 +501,9 @@ export default {
 			this.uploading = false;
 		},
 		checkModelNo(row) {
-            if (_.find(this.modelNoList, { sourceserial: row.sourceserial, deliveryDate: row.deliveryDate, materialNo: row.materialNo })) {
-                debugger
+            //debugger
+            if (_.find(this.modelNoList, { sourceserial: row.sourceserial, deliveryDate: row.deliveryDate, materialNo: row.materialNo, detailNumber:row.detailNumber })) {
+                //debugger
 				return true;
 			}
 			return false;
@@ -607,7 +609,8 @@ export default {
 				},
 				cols: {
 					productName: 1,
-					crmId: 1,
+                    crmId: 1,
+                    detailNumber:1,
 					sourceserial: 1,
 					projectNo: 1,
 					materialNo: 1,

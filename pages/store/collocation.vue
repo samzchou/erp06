@@ -3,8 +3,7 @@
         <div class="head-title">
             <div>
                 <div>
-                    <span :class="{'inactive':!isColled}" @click="setOrderParams(false)">制定配料单</span>
-                    <span :class="{'inactive':isColled}" @click="setOrderParams(true)">已导出的配料单</span>
+                    <span class="inactive">制定配料单</span>
                 </div>
             </div>
         </div>
@@ -14,28 +13,20 @@
                     <el-form-item label="系统订单号：" prop="serial">
                         <el-input v-model="searchForm.serial" clearable style="width:150px" />
                     </el-form-item>
-                    <el-form-item label="业务类型：" prop="business">
-                        <el-select v-model="searchForm.business" placeholder="请选择" clearable style="width:100px">
-                            <el-option v-for="item in orderBusiness" :key="item.value" :label="item.label" :value="item.value" />
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="物料号：" prop="materialNo">
-                        <el-input v-model="searchForm.materialNo" clearable style="width:150px" />
-                    </el-form-item>
-                    <el-form-item label="供应商" prop="crmId">
-                        <el-select v-model="searchForm.crmId" placeholder="请选择" filterable style="width:200px">
-                            <el-option v-for="crm in crmList.filter(o=>o.typeId==1)" :key="crm.id" :label="crm.name" :value="crm.id" />
-                        </el-select>
-                    </el-form-item>
                     <el-form-item label="项目号：" prop="projectNo">
                         <el-input v-model="searchForm.projectNo" clearable style="width:150px" />
                     </el-form-item>
                     <el-form-item label="项目名称：" prop="projectName">
                         <el-input v-model="searchForm.projectName" clearable style="width:150px" />
                     </el-form-item>
+                    <el-form-item label="类型：" prop="types" clearable>
+                        <el-select v-model="searchForm.types" placeholder="请选择">
+                            <el-option v-for="item in typesArr" :key="item.value" :label="item.label" :value="item.value" />
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="交货日期：" prop="deliveryDate">
-                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" clearable editable unlink-panels style="width:150px"
-                        />
+                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp"  type="daterange" range-separator="至" start-placeholder="开始日期"
+                            end-placeholder="结束日期" clearable editable unlink-panels style="width:200px" />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submitSearch">搜索</el-button>
@@ -72,6 +63,7 @@
                     <el-table-column prop="sourceserial" label="订单号" width="150" />
                     <el-table-column prop="projectNo" label="项目号" width="150" sortable />
                     <el-table-column prop="projectName" label="项目名称" />
+                    <el-table-column prop="boxNo" label="箱号" width="100" />
                     <el-table-column prop="allcount" label="配料总数" width="100" />
                     <el-table-column prop="deliveryDate" label="交货日期" width="125" sortable>
                         <template slot-scope="scope">
@@ -111,14 +103,15 @@ export default {
             gridList: [],
             query: {
                 page: 1,
-                pagesize: 500
+                pagesize: 100
             },
+            typesArr:[{'label':'售后91000','value':'91000'},{'label':'9#-3','value':'9#-3'},{'label':'2#-6','value':'2#-6'}],
             searchForm: {
                 serial: '',
-                crmId: '',
-                materialNo: '',
-                productName: '',
+                projectNo:'',
+                projectName:'',
                 orderDate: '',
+                types:'',
                 deliveryDate: '',
                 business: '',
             },
@@ -174,9 +167,41 @@ export default {
         },
         exportTable() {
             this.exportLoading = true;
-            //console.log(this.orderList);
-            let exportData = [], index = 1, ids = [];
-            this.orderList.forEach(item => {
+            //console.log('orderList', this.orderList);
+            let exportData = [], index = 0, ids = [], allCounts = 0;
+            this.orderList.forEach(order => {
+                order.result.forEach(item=>{
+                    if(item.checked){
+                        ids.push(item.id);
+                        allCounts += item.count;
+                        let orderIndex = _.findIndex(exportData, {'materialNo':item.materialNo});
+                        if(!~orderIndex){
+                            exportData.push({
+                                "materialNo":item.materialNo,
+                                "productName": item.productName,
+                                "count": item.count,
+                                "deliveryDate": item.deliveryDate,
+                                "a1": "",
+                                "a2": "",
+                                "a3": ""
+                            })
+                        }else{
+                            exportData[orderIndex]['count'] += item.count;
+                        }
+                    }
+                })
+            });
+            exportData = _.sortBy(exportData,['productName']);
+            exportData = _.map(exportData, item=>{
+                index++;
+                item.inex = index;
+                return item;
+            })
+            /* console.log('exportData', exportData, allCounts);
+            this.exportLoading = false;
+            return; */
+
+            /* this.orderList.forEach(item => {
                 exportData.push({
                     "businessName": "",
                     "productName": item.productName,
@@ -187,6 +212,7 @@ export default {
                     "a3": ""
                 });
                 let res = this.totalCount(item.result);
+                allCounts += res.allCount;
                 exportData.push({
                     'index': index,
                     "businessName": this.parseBusiness(item.business),
@@ -199,13 +225,13 @@ export default {
                 });
                 index++;
                 ids = _.concat(ids, res.ids);
-
-            });
-            // console.log('deliveryDate', this.searchForm.deliveryDate)
+            }); */
+            
+            /* this.exportLoading = false;
+            return; */
             import('@/components/Export2Excel').then(excel => {
-                const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
-                const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
-                //debugger
+                const tHeader = ['序号', '物料名称', '物料号', '汇总数量', '包装日期', '配料人', '仓管', '领料人'];
+                const filterVal = ['index', 'productName', 'materialNo', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
                 const data = this.formatJson(filterVal, exportData);
                 const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDDhhmmss');
                 excel.export_json_to_excel({
@@ -213,12 +239,13 @@ export default {
                     data,
                     filename: '配料单-' + now
                 });
+                this.exportLoading = false;
                 // 加入配料单表
-                this.addIndet(ids, '配料单-' + now)
+                this.addIndet(ids, '配料单-' + now, allCounts);
                 this.updateOrder(ids);
             });
         },
-        addIndet(ids, serial) {
+        addIndet(ids, serial, allCounts) {
             this.lastIndetId++;
             let condition = {
                 type: 'addData',
@@ -228,6 +255,7 @@ export default {
                     "id": this.lastIndetId,
                     "serial": serial,
                     "orderIds": ids,
+                    "count":allCounts,
                     "createByUser": this.$store.state.user.name
                 }
             };
@@ -254,30 +282,10 @@ export default {
                 this.addStoreCalc(result);
                 this.submitSearch(true);
             });
-
-            // 更新原始订单状态
-            /* let orderCondition = {
-                type: "updatePatch",
-                collectionName: "order",
-                param: { id: { $in: ids } },
-                set: {
-                    $set: {
-                        'isColled': true,
-                        'flowStateId':4
-                    }
-                }
-            };
-            console.log('orderCondition', orderCondition)
-            //return
-            // 更新原始订单状态为已出库
-            this.$axios.$post('mock/db', { data: orderCondition }).then(result => {
-                this.exportLoading = false;
-                this.submitSearch(true);
-            }); */
         },
         addStoreCalc(list) {
-            console.log('addStoreCalc', list);
-            debugger
+            /* console.log('addStoreCalc', list);
+            debugger */
             let dataList = [];
             list.forEach(item => {
                 //debugger
@@ -324,10 +332,23 @@ export default {
                 if (this.searchForm[k] != '' && this.searchForm[k]) {
                     if (_.isNumber(this.searchForm[k])) {
                         params[k] = Number(this.searchForm[k]);
+                    } else if (_.isArray(this.searchForm[k]) && k === "deliveryDate") {
+                        params[k] = {
+                            $gte: this.searchForm[k][0],
+                            $lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
+                        };
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] };
                     } else {
-                        params[k] = { $regex: this.searchForm[k] };
+                        if(k == 'types'){
+                            if(this.searchForm[k] == '91000'){
+                                params['sourceserial'] = { $regex: this.searchForm[k] };
+                            }else{
+                                params['boxNo'] = this.searchForm[k];
+                            }
+                        }else{
+                            params[k] = { $regex: this.searchForm[k] };
+                        }
                     }
                 }
             };
@@ -375,6 +396,7 @@ export default {
                             "business": { "$first": "$business" },
                             "projectNo": { "$first": "$projectNo" },
                             "projectName": { "$first": "$projectName" },
+                            "boxNo": { "$first": "$boxNo" },
                             "sourceserial": { "$first": "$sourceserial" },
                             "deliveryDate": { "$first": "$deliveryDate" },
                             "allcount": { $sum: "$count" },

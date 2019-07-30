@@ -473,6 +473,11 @@ module.exports = {
                 default: '',
                 label: '产品名称'
             },
+			detailNumber: {
+                type: String,
+                default: '',
+                label: '细项号'
+            },
             projectNo: {
                 type: String,
                 default: '',
@@ -578,109 +583,6 @@ module.exports = {
                 default: '',
                 label: '操作人'
             },
-        },
-        /*----------订单上传原始数据，暂废弃-----------*/
-        orderUpload: {
-            id: {
-                type: Number,
-                default: 0
-            },
-            isPayed: {
-                type: Boolean,
-                default: false
-            },
-            flowStateId: {
-                type: Number,
-                default: 0
-            },
-            typeId: {
-                type: Number,
-                default: 0
-            },
-            ptypeId: {
-                type: Number,
-                default: 0
-            },
-            sourceserial: {
-                type: String,
-                default: ''
-            },
-            crmId: {
-                type: Number,
-                default: 0
-            },
-            crmName: {
-                type: String,
-                default: ''
-            },
-            productId: {
-                type: Number,
-                default: 0
-            },
-            productName: {
-                type: String,
-                default: ''
-            },
-            projectNo: {
-                type: String,
-                default: ''
-            },
-            projectName: {
-                type: String,
-                default: ''
-            },
-            boxNo: {
-                type: String,
-                default: ''
-            },
-            model: {
-                type: String,
-                default: ''
-            },
-            modelNo: {
-                type: String,
-                default: ''
-            },
-            materialNo: {
-                type: String,
-                default: ''
-            },
-            caselNo: {
-                type: String,
-                default: ''
-            },
-            util: {
-                type: String,
-                default: ''
-            },
-            price: {
-                type: Number,
-                default: 0
-            },
-            count: {
-                type: Number,
-                default: 0
-            },
-            orderDate: {
-                type: Number,
-                default: new Date().getTime()
-            },
-            deliveryDate: {
-                type: Number,
-                default: new Date().getTime()
-            },
-            content: {
-                type: String,
-                default: ''
-            },
-            createByUser: {
-                type: String,
-                default: ''
-            },
-            updateDate: {
-                type: Number,
-                default: new Date().getTime()
-            }
         },
         /*----------配料单-----------*/
         ingred: {
