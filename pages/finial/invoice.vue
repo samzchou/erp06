@@ -8,17 +8,13 @@
                             <el-table-column type="expand">
                                 <template slot-scope="scope">
                                     <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
-                                        <!-- <el-col :span="3">
-                                            <span style="width:30px">{{idx+1}}、</span>
-                                            <span>ID：{{item.id}}</span>
-                                        </el-col> -->
-                                        <el-col :span="4"><span style="width:30px">{{idx+1}}、</span>物料号：{{item.materialNo}}</el-col>
+                                        <el-col :span="4">
+                                            <span style="width:30px">{{idx+1}}、</span>物料号：{{item.materialNo}}</el-col>
                                         <el-col :span="5">物料描述：{{item.productName}}</el-col>
                                         <el-col :span="3">订单量：{{item.count}}</el-col>
                                         <el-col :span="3">订单单价：{{item.price}}</el-col>
                                         <el-col :span="3">总价：{{parseMoney(item)}}</el-col>
                                     </el-row>
-                                    <!-- <div>{{scope.row.result}}</div> -->
                                 </template>
                             </el-table-column>
                             <el-table-column type="selection" width="50" align="center" />
@@ -45,7 +41,9 @@
                         </el-table>
                     </div>
                     <div class="pages">
-                        <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page" :page-sizes="[30, 50, 100, 300,500]" :page-size="query.pagesize" layout="total, sizes, prev, pager, next" :total="total" />
+                        <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
+                            :page-sizes="[30, 50, 100, 300,500]" :page-size="query.pagesize" layout="total, sizes, prev, pager, next"
+                            :total="total" />
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="已开发票" name="second">已开发票</el-tab-pane>
@@ -65,14 +63,14 @@ export default {
             page: 1,
             pagesize: 500
         },
-        total:0,
+        total: 0,
     }),
     methods: {
         parseDate(date, format) {
             return moment(date).format(format || 'YYYY-MM-DD');
         },
-        parseMoney(row){
-            return this.$options.filters['currency'](row.count*row.price);
+        parseMoney(row) {
+            return this.$options.filters['currency'](row.count * row.price);
         },
         handleClick() {
 
@@ -80,10 +78,10 @@ export default {
         handleSelectionChange(rows) {
 
         },
-        handleSizeChange(){
+        handleSizeChange() {
 
         },
-        handleCurrentChange(){
+        handleCurrentChange() {
 
         },
         async getList(match = {}) {
@@ -106,8 +104,8 @@ export default {
                         "$group": {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
-                            "serial":{"$first":"$serial"},
-							"sourceserial":{"$first" :"$sourceserial"},
+                            "serial": { "$first": "$serial" },
+                            "sourceserial": { "$first": "$sourceserial" },
                             "projectNo": { "$first": "$projectNo" },
                             "projectName": { "$first": "$projectName" },
                             /* "crmId": { "$first": "$crmId" },
@@ -161,11 +159,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-    @import '~/assets/scss/order.scss';
-    /deep/ .el-tabs{
-        .pages{
-            padding:10px 0;
-        }
-    }
-    
+@import '~/assets/scss/order.scss';
+/deep/ .el-tabs {
+	.pages {
+		padding: 10px 0;
+	}
+}
 </style>

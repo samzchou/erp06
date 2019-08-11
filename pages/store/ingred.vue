@@ -56,12 +56,12 @@
         </div>
         <el-dialog :title="dialogTitle" append-to-body :close-on-click-modal="false" :visible.sync="dialogVisible" width="65%">
             <el-table v-loading="detailLoading" ref="detailList" :data="detailList" border fit highlight-current-row stripe size="mini"
-                    max-height="500" style="width:100%">
+                max-height="500" style="width:100%">
                 <el-table-column label="序号" type="index" width="60" align="center" />
                 <el-table-column prop="materialNo" label="物料号" width="150" />
                 <el-table-column prop="productName" label="物料名称" />
-                <el-table-column prop="count" label="汇总数量" width="100"  />
-                <el-table-column prop="deliveryDate" label="交货日期" width="120" >
+                <el-table-column prop="count" label="汇总数量" width="100" />
+                <el-table-column prop="deliveryDate" label="交货日期" width="120">
                     <template slot-scope="scope">
                         <div>
                             <span>{{parseDate(scope.row.deliveryDate)}}</span>
@@ -70,7 +70,7 @@
                 </el-table-column>
             </el-table>
             <div style="padding: 10px 0;text-align: right;">
-                <el-button size="small" type="primary" icon="el-icon-download">导出配料单</el-button>
+                <el-button size="small" type="primary" icon="el-icon-download" @click="exportTable">导出配料单</el-button>
                 <el-button size="small" icon="el-icon-close" @click="dialogVisible=false">取消关闭</el-button>
             </div>
         </el-dialog>
@@ -94,42 +94,40 @@ export default {
             },
             orderList: [],
             exportLoading: false,
-            dialogVisible:false,
-            detailLoading:false,
-            detailList:[],
-            dialogTitle:'',
+            dialogVisible: false,
+            detailLoading: false,
+            detailList: [],
+            dialogTitle: '',
         }
     },
     methods: {
         showDetail(row) {
             this.dialogTitle = row.serial;
             let params = {
-                type:'listData',
+                type: 'listData',
                 collectionName: 'order',
-                data:{
-                    id:{$in:row.orderIds}
+                data: {
+                    id: { $in: row.orderIds }
                 }
             }
-            this.$axios.$post('mock/db', {data:params}).then(res=>{
+            this.$axios.$post('mock/db', { data: params }).then(res => {
                 console.log('showDetail', row.orderIds, res);
                 this.setList(res.list);
-                
             });
             this.dialogVisible = true;
         },
-        setList(list){
+        setList(list) {
             let arr = [];
-            list.forEach(item=>{
-                debugger
-                let orderIndex = _.findIndex(arr, {'materialNo':item.materialNo});
-                if(!~orderIndex){
+            list.forEach(item => {
+                let orderIndex = _.findIndex(arr, { 'materialNo': item.materialNo });
+                if (!~orderIndex) {
                     arr.push({
-                        "materialNo":item.materialNo,
+                        "materialNo": item.materialNo,
                         "productName": item.productName,
                         "count": item.count,
                         "deliveryDate": item.deliveryDate
                     })
-                }else{
+                } else {
                     arr[orderIndex]['count'] += item.count;
                 }
             });
@@ -141,38 +139,26 @@ export default {
         exportTable() {
             this.exportLoading = true;
             let exportData = [], index = 1, ids = [];
-            this.orderList.forEach(item => {
+            this.detailList.forEach(item => {
                 exportData.push({
+                    "index": index,
                     "businessName": "",
                     "productName": item.productName,
-                    "count": "",
-                    "deliveryDate": "",
-                    "a1": "",
-                    "a2": "",
-                    "a3": ""
-                });
-                let res = this.totalCount(item.result);
-                exportData.push({
-                    'index': index,
-                    "businessName": this.parseBusiness(item.business),
-                    "productName": item.materialNo,
-                    "count": res.allCount,
+                    "materialNo": item.materialNo,
+                    "count": item.count,
                     "deliveryDate": item.deliveryDate,
                     "a1": "",
                     "a2": "",
                     "a3": ""
                 });
                 index++;
-                ids = _.concat(ids, res.ids);
-
             });
-            // console.log('deliveryDate', this.searchForm.deliveryDate)
+
             import('@/components/Export2Excel').then(excel => {
-                const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
-                const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
-                //debugger
+                const tHeader = ['序号', '物料名称', '物料号', '汇总数量', '包装日期', '配料人', '仓管', '领料人'];
+                const filterVal = ['index', 'productName', 'materialNo', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
                 const data = this.formatJson(filterVal, exportData);
-                const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDDhhmmss');
+                const now = moment(new Date()).format('YYYYMMDDhhmmss');
                 excel.export_json_to_excel({
                     header: tHeader,
                     data,

@@ -83,14 +83,6 @@
                             <span>{{scope.row.total}}</span>
                         </template>
                     </el-table-column>
-                    <!-- <el-table-column prop="finishCount" label="可送货量" width="80" /> -->
-                    <!-- <el-table-column label="库存量计算" width="120">
-                        <template slot-scope="scope">
-                            <div v-if="calcStore(scope.row.result) && !scope.row.isCanceled">
-                                <span class="warning">库存不足或未制单</span>
-                            </div>
-                        </template>
-                    </el-table-column> -->
                     <el-table-column prop="orderDate" label="制单日期" width="100" sortable>
                         <template slot-scope="scope">
                             <span>{{parseDate(scope.row.orderDate)}}</span>
@@ -105,10 +97,10 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="isCanceled" label="操作" align="center" width="80">
+                    <el-table-column prop="isCanceled" label="操作" align="center" width="120">
                         <template slot-scope="scope">
-                            <el-button v-if="scope.row.isCanceled" size="mini" class="icon-link" icon="my-icon-share" @click="handleCancel(scope.row, false)">恢复</el-button>
-                            <el-button v-else size="mini" type="text" icon="my-icon-reply" @click="handleCancel(scope.row, true)">取消</el-button>
+                            <el-button v-if="scope.row.isCanceled" size="mini" class="icon-link" icon="my-icon-share" @click="handleCancel(scope.row, false)">恢复送货</el-button>
+                            <el-button v-else size="mini" type="text" icon="my-icon-reply" @click="handleCancel(scope.row, true)">取消送货</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -118,7 +110,6 @@
                     <span style="margin-right:15px;">请选择可以出库送货的订单，制定出库送货单</span>
                     <el-button size="mini" type="primary" :disabled="!orderList.length" @click="openDialogVisible=true">制订送货单({{orderList.length-1}})</el-button>
                     <el-button size="mini" type="primary" icon="el-icon-download" @click="batchDelay" :disabled="!selectSourceserial.length">批量推迟交货</el-button>
-
                 </div>
                 <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
                     :page-sizes="[5,20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next"
@@ -173,7 +164,7 @@
                         </el-row>
                     </template>
                 </el-table-column>
-               
+
                 <el-table-column prop="projectName" label="项目名称" />
                 <el-table-column prop="projectNo" label="项目号" width="120" />
                 <el-table-column prop="modelNo" label="梯号" width="70" />
@@ -426,6 +417,7 @@ export default {
                 collectionName: 'order',
                 notNotice: true,
                 user: this.$store.state.user.name,
+                notCalc: true,
                 data: { 'id': { $in: this.updateIds } },
                 set: { $set: { 'flowStateId': 10, 'updateByUser': this.$store.state.user.name } }
             }
@@ -437,7 +429,7 @@ export default {
                 this.orderList = [];
                 this.exportLoading = false;
                 this.openDialogVisible = false;
-                this.addStoreCalc(result);
+                //this.addStoreCalc(result);
                 this.submitSearch(true);
             });
         },
@@ -559,18 +551,13 @@ export default {
 
         async getList(match = {}) {
             this.listLoading = true;
-            /* let resStore = await this.$axios.$post("mock/db", { data: { type: "listData", collectionName: "store" } });
-            let storeArr = [];
-            if (resStore) {
-                storeArr = resStore.list;
-            } */
             let groupId = { "sourceserial": "$sourceserial", "projectNo": "$projectNo" };
             let bySerial = { 'sourceserial': { $ne: '' } };
             if (!this.needSource) {
                 bySerial = { 'sourceserial': '' };
                 groupId = { "serial": "$serial", "projectNo": "$projectNo" };
             }
-            match = _.merge({ flowStateId: { $lt: 10 } }, bySerial, match);
+            match = _.merge({ flowStateId: { $lt: 10 }, isColled: true }, bySerial, match);
             //match = _.merge({ flowStateId: { $in: [3,8] } }, bySerial, match);
             let condition = {
                 type: 'groupList',

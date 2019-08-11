@@ -3,7 +3,8 @@
         <div class="head-title">
             <div>
                 <div>
-                    <span class="inactive">制定配料单</span>
+                    <span :class="{'inactive':!isColled}" @click="setOrderParams(false)">制定配料单</span>
+                    <span :class="{'inactive':isColled}" @click="setOrderParams(true)">已导出的配料单</span>
                 </div>
             </div>
         </div>
@@ -13,20 +14,28 @@
                     <el-form-item label="系统订单号：" prop="serial">
                         <el-input v-model="searchForm.serial" clearable style="width:150px" />
                     </el-form-item>
+                    <el-form-item label="业务类型：" prop="business">
+                        <el-select v-model="searchForm.business" placeholder="请选择" clearable style="width:100px">
+                            <el-option v-for="item in orderBusiness" :key="item.value" :label="item.label" :value="item.value" />
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="物料号：" prop="materialNo">
+                        <el-input v-model="searchForm.materialNo" clearable style="width:150px" />
+                    </el-form-item>
+                    <el-form-item label="供应商" prop="crmId">
+                        <el-select v-model="searchForm.crmId" placeholder="请选择" filterable style="width:200px">
+                            <el-option v-for="crm in crmList.filter(o=>o.typeId==1)" :key="crm.id" :label="crm.name" :value="crm.id" />
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="项目号：" prop="projectNo">
                         <el-input v-model="searchForm.projectNo" clearable style="width:150px" />
                     </el-form-item>
                     <el-form-item label="项目名称：" prop="projectName">
                         <el-input v-model="searchForm.projectName" clearable style="width:150px" />
                     </el-form-item>
-                    <el-form-item label="类型：" prop="types" clearable>
-                        <el-select v-model="searchForm.types" placeholder="请选择">
-                            <el-option v-for="item in typesArr" :key="item.value" :label="item.label" :value="item.value" />
-                        </el-select>
-                    </el-form-item>
                     <el-form-item label="交货日期：" prop="deliveryDate">
-                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期"
-                            end-placeholder="结束日期" clearable editable unlink-panels style="width:200px" />
+                        <el-date-picker v-model="searchForm.deliveryDate" value-format="timestamp" clearable editable unlink-panels style="width:150px"
+                        />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submitSearch">搜索</el-button>
@@ -46,17 +55,17 @@
                         <template slot-scope="scope" v-if="scope.row.result && scope.row.result.length">
                             <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
                                 <el-col :span="1">
-                                    <el-checkbox v-model="item.ischecked" @change="setChecked(item, scope.row)" :disabled="item.storeCount<=0" />
+                                    <el-checkbox v-model="item.checked" @change="setChecked(item, scope.row)" />
                                 </el-col>
                                 <el-col :span="3">
                                     <span style="width:30px">{{idx+1}}、</span>
                                     <span>业务类型：{{parseBusiness(item.business)}}</span>
                                 </el-col>
-                                <el-col :span="3">物料号：{{item.materialNo}}</el-col>
-                                <el-col :span="4">物料名称：{{item.productName}}</el-col>
-                                <el-col :span="1">{{item.typeId==1?'采购':'生产'}}</el-col>
-                                <el-col :span="2" :style="{'color':item.storeCount>0?'green':'red'}">可用库存：{{item.storeCount}}</el-col>
+                                <el-col :span="4">物料号：{{item.materialNo}}</el-col>
+                                <el-col :span="5">物料名称：{{item.productName}}</el-col>
+                                <el-col :span="2">{{item.flowStateId==3?'采购':'生产'}}</el-col>
                                 <el-col :span="2">数量：{{item.count}}</el-col>
+                                <el-col :span="2">单价：{{item.price}}</el-col>
                                 <el-col :span="5">供应商：{{item.crmName}}</el-col>
                             </el-row>
                         </template>
@@ -64,13 +73,7 @@
                     <el-table-column prop="sourceserial" label="订单号" width="150" />
                     <el-table-column prop="projectNo" label="项目号" width="150" sortable />
                     <el-table-column prop="projectName" label="项目名称" />
-                    <el-table-column prop="boxNo" label="箱号" width="100" />
                     <el-table-column prop="allcount" label="配料总数" width="100" />
-                    <el-table-column label="是否可配料" width="100">
-                        <template slot-scope="scope">
-                            <div v-html="parseColled(scope.row.result)"></div>
-                        </template>
-                    </el-table-column>
                     <el-table-column prop="deliveryDate" label="交货日期" width="125" sortable>
                         <template slot-scope="scope">
                             <div>
@@ -88,6 +91,7 @@
                 <div v-else>
                     <i class="el-icon-loading" /> 正在导出配料单...
                 </div>
+
                 <el-pagination size="mini" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="query.page"
                     :page-sizes="[5,20, 50, 100, 200, 500]" :page-size="query.pagesize" layout="total,sizes,prev,pager,next"
                     :total="total">
@@ -108,15 +112,14 @@ export default {
             gridList: [],
             query: {
                 page: 1,
-                pagesize: 100
+                pagesize: 500
             },
-            typesArr: [{ 'label': '售后91000', 'value': '91000' }, { 'label': '9#-3', 'value': '9#-3' }, { 'label': '2#-6', 'value': '2#-6' }],
             searchForm: {
                 serial: '',
-                projectNo: '',
-                projectName: '',
+                crmId: '',
+                materialNo: '',
+                productName: '',
                 orderDate: '',
-                types: '',
                 deliveryDate: '',
                 business: '',
             },
@@ -127,20 +130,9 @@ export default {
             storeArr: [],            // 库存列表
             storeCalcLastId: 0,
             lastIndetId: 0,
-            storeList: [],
         }
     },
     methods: {
-        parseColled(list) {
-            let flagStr = '<span style="color:green">可配料</span>';
-            for (let i = 0; i < list.length; i++) {
-                if (list[i]['storeCount'] == 0) {
-                    flagStr = '<span style="color:red">缺少库存</span>';
-                    break;
-                }
-            }
-            return flagStr;
-        },
         parseBusiness(val) {
             if (!val) return "";
             return val == 1 ? "售后" : "项目";
@@ -155,7 +147,7 @@ export default {
         setChecked(item, row) {
             let checkedCount = 0;
             row.result.forEach(item => {
-                if (item.ischecked) {
+                if (item.checked) {
                     checkedCount++;
                 }
             });
@@ -167,14 +159,14 @@ export default {
             this.gridList.forEach(item => {
                 let index = _.findIndex(rows, { "id": item.id });
                 item.result.forEach(c => {
-                    c.ischecked = !!~index;
+                    c.checked = !!~index;
                 })
             });
         },
         totalCount(lists) {
             let allCount = 0, ids = [];
             lists.forEach(item => {
-                if (item.ischecked) {
+                if (item.checked) {
                     allCount += item.count;
                     ids.push(item.id);
                 }
@@ -183,41 +175,40 @@ export default {
         },
         exportTable() {
             this.exportLoading = true;
-            //console.log('orderList', this.orderList);
-            let exportData = [], index = 0, ids = [], allCounts = 0;
-            this.orderList.forEach(order => {
-                order.result.forEach(item => {
-                    if (item.ischecked) {
-                        ids.push(item.id);
-                        allCounts += item.count;
-                        let orderIndex = _.findIndex(exportData, { 'materialNo': item.materialNo });
-                        if (!~orderIndex) {
-                            exportData.push({
-                                "materialNo": item.materialNo,
-                                "productName": item.productName,
-                                "count": item.count,
-                                "deliveryDate": item.deliveryDate,
-                                "a1": "",
-                                "a2": "",
-                                "a3": ""
-                            })
-                        } else {
-                            exportData[orderIndex]['count'] += item.count;
-                        }
-                    }
-                })
-            });
-            exportData = _.sortBy(exportData, ['productName']);
-            exportData = _.map(exportData, item => {
+            //console.log(this.orderList);
+            let exportData = [], index = 1, ids = [];
+            console.log(this.orderList);
+            return;
+            this.orderList.forEach(item => {
+                exportData.push({
+                    "businessName": "",
+                    "productName": item.productName,
+                    "count": "",
+                    "deliveryDate": "",
+                    "a1": "",
+                    "a2": "",
+                    "a3": ""
+                });
+                let res = this.totalCount(item.result);
+                exportData.push({
+                    'index': index,
+                    "businessName": this.parseBusiness(item.business),
+                    "productName": item.materialNo,
+                    "count": res.allCount,
+                    "deliveryDate": item.deliveryDate,
+                    "a1": "",
+                    "a2": "",
+                    "a3": ""
+                });
                 index++;
-                item.inex = index;
-                return item;
-            });
-            //console.log('exportData', exportData);
+                ids = _.concat(ids, res.ids);
 
+            });
+            // console.log('deliveryDate', this.searchForm.deliveryDate)
             import('@/components/Export2Excel').then(excel => {
-                const tHeader = ['序号', '物料名称', '物料号', '汇总数量', '包装日期', '配料人', '仓管', '领料人'];
-                const filterVal = ['index', 'productName', 'materialNo', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
+                const tHeader = ['序号', '业务类型', '物料信息', '汇总数量', '交货日期', '配料人', '仓管', '领料人'];
+                const filterVal = ['index', 'businessName', 'productName', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
+                //debugger
                 const data = this.formatJson(filterVal, exportData);
                 const now = moment(this.searchForm.deliveryDate ? this.searchForm.deliveryDate : new Date()).format('YYYYMMDDhhmmss');
                 excel.export_json_to_excel({
@@ -225,14 +216,12 @@ export default {
                     data,
                     filename: '配料单-' + now
                 });
-                this.exportLoading = false;
-                //return;
                 // 加入配料单表
-                this.addIndet(ids, '配料单-' + now, allCounts);
+                this.addIndet(ids, '配料单-' + now)
                 this.updateOrder(ids);
             });
         },
-        addIndet(ids, serial, allCounts) {
+        addIndet(ids, serial) {
             this.lastIndetId++;
             let condition = {
                 type: 'addData',
@@ -242,7 +231,6 @@ export default {
                     "id": this.lastIndetId,
                     "serial": serial,
                     "orderIds": ids,
-                    "count": allCounts,
                     "createByUser": this.$store.state.user.name
                 }
             };
@@ -256,21 +244,43 @@ export default {
                 collectionName: 'order',
                 notNotice: true,
                 data: { 'id': { $in: ids } },
-                set: { $set: { 'isColled': true, 'flowStateId': 9, 'updateByUser': this.$store.state.user.name } }
+                set: { $set: { 'isColled': true, 'flowStateId': 4, 'updateByUser': this.$store.state.user.name } }
             }
             let updateData = [];
             console.log('updateIds', ids);
-
+            /* console.log('updateIds', ids);
+            this.exportLoading = false;
+            return */
             // 更新原始订单状态为已出库
             this.$axios.$post('mock/db', { data: cn }).then(result => {
                 this.exportLoading = false;
-                //this.addStoreCalc(result);
+                this.addStoreCalc(result);
                 this.submitSearch(true);
             });
+
+            // 更新原始订单状态
+            /* let orderCondition = {
+                type: "updatePatch",
+                collectionName: "order",
+                param: { id: { $in: ids } },
+                set: {
+                    $set: {
+                        'isColled': true,
+                        'flowStateId':4
+                    }
+                }
+            };
+            console.log('orderCondition', orderCondition)
+            //return
+            // 更新原始订单状态为已出库
+            this.$axios.$post('mock/db', { data: orderCondition }).then(result => {
+                this.exportLoading = false;
+                this.submitSearch(true);
+            }); */
         },
         addStoreCalc(list) {
-            /* console.log('addStoreCalc', list);
-            debugger */
+            console.log('addStoreCalc', list);
+            debugger
             let dataList = [];
             list.forEach(item => {
                 //debugger
@@ -317,23 +327,10 @@ export default {
                 if (this.searchForm[k] != '' && this.searchForm[k]) {
                     if (_.isNumber(this.searchForm[k])) {
                         params[k] = Number(this.searchForm[k]);
-                    } else if (_.isArray(this.searchForm[k]) && k === "deliveryDate") {
-                        params[k] = {
-                            $gte: this.searchForm[k][0],
-                            $lt: this.searchForm[k][1] + 24 * 3600 * 1000 - 1
-                        };
                     } else if (_.isArray(this.searchForm[k])) {
                         params[k] = { $in: this.searchForm[k] };
                     } else {
-                        if (k == 'types') {
-                            if (this.searchForm[k] == '91000') {
-                                params['sourceserial'] = { $regex: this.searchForm[k] };
-                            } else {
-                                params['boxNo'] = this.searchForm[k];
-                            }
-                        } else {
-                            params[k] = { $regex: this.searchForm[k] };
-                        }
+                        params[k] = { $regex: this.searchForm[k] };
                     }
                 }
             };
@@ -358,18 +355,8 @@ export default {
 
         async getList(match = {}) {
             this.listLoading = true;
-            let cn = {
-                type: 'listData',
-                collectionName: 'store',
-                column: { productName: 1, materialNo: 1, count: 1 },
-                data: {}
-            }
-            let storeList = await this.$axios.$post('mock/db', { data: cn });
-            this.storeList = storeList.list;
-            console.log('this.storeList', this.storeList);
-
             let groupId = { "projectNo": "$projectNo" };
-            match = _.merge({ "isColled": false, "flowStateId": { $lt: 9 } }, match); // $in: [3, 8] }
+            match = _.merge({ "isColled": this.isColled, "flowStateId": { $in: [3, 8] } }, match);
             //match = _.merge({ "isColled": this.isColled, "flowStateId": { $gte: 2, $lt: 4 }, "typeId": 1 }, match);
             //debugger
             let condition = {
@@ -389,11 +376,8 @@ export default {
                             "_id": groupId, // 按字段分组
                             "id": { "$first": "$id" },
                             "business": { "$first": "$business" },
-                            "typeId": { "$first": "$typeId" },
-                            "flowStateId": { "$first": "$flowStateId" },
                             "projectNo": { "$first": "$projectNo" },
                             "projectName": { "$first": "$projectName" },
-                            "boxNo": { "$first": "$boxNo" },
                             "sourceserial": { "$first": "$sourceserial" },
                             "deliveryDate": { "$first": "$deliveryDate" },
                             "allcount": { $sum: "$count" },
@@ -410,17 +394,7 @@ export default {
             this.gridList = result.list.map(item => {
                 item.result = _.sortBy(item.result, ['projectNo', 'deliveryDate']);
                 item.result = item.result.map(c => {
-                    let stroeIndex = _.findIndex(this.storeList, { 'materialNo': c.materialNo });
-                    if (!!~stroeIndex) {
-                        let storeItem = this.storeList[stroeIndex];
-                        c.storeCount = storeItem['count'];
-                        //let rcount = c.storeCount - c.count;
-                        storeItem['count'] = c.storeCount - c.count;
-                        this.$set(this.storeList, stroeIndex, storeItem);
-                    } else {
-                        c.storeCount = 0;
-                    }
-                    c.ischecked = c.storeCount > 0;
+                    c.checked = true;
                     return c;
                 });
                 return item;

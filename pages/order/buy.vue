@@ -110,7 +110,7 @@
                         <span>{{parseDate(scope.row.orderDate)}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="deliveryDate" label="交付日期" width="100" sortable >
+                <el-table-column prop="deliveryDate" label="交付日期" width="100" sortable>
                     <template slot-scope="scope">
                         <span>{{parseDate(scope.row.deliveryDate)}}</span>
                     </template>
@@ -896,22 +896,7 @@ export default {
                     }
                 ]
             }
-            /* let params = {
-				type: "groupList", //groupList aggregate
-				collectionName: "order",
-                data: match,
-                aggregate:[
-                    { $match: match },
-                    {
-                        $group:{
-                            _id: { sourceserial: "$sourceserial" },
-                            count: { $sum: "$count" },
-                        }
-                    }
-                ]
-            } */
             let res = await this.$axios.$post("mock/db", { data: params });
-            //console.log('getOtherItem', res);
         },
         // 合并临时库存量
         uionStore(storeInArr) {

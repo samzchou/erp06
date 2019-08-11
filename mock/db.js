@@ -336,65 +336,66 @@ const dbFun = {
             delete response.msgDesc;
         }
         return response;
-        /*
-        return {
-            success:result?true:false,
-            msgDesc:result?'数据更新成功':'数据更新失败'
-        }
-        */
     },
     /*--------批量出库--------*/
     async outStore(params) {
         const tn = params.collectionName;
         return new Promise((resolve, reject) => {
             mongoDB[tn].updateMany(params.data, params.set).then(res => {
-                let aggregates = [
-                    { "$match": params.data },
-                    {
-                        $lookup: {
-                            from: "store",
-                            localField: "materialNo", //materialNo
-                            foreignField: "materialNo", //materialNo
-                            as: "store"
-                        }
-                    },
-                    {
-                        $unwind: { // 拆分子数组
-                            path: "$store",
-                            preserveNullAndEmptyArrays: true // 空的数组也拆分
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: { "id": "$id" },
-                            "id": { "$first": "$id" },
-                            "typeId": { "$first": "$typeId" },
-                            "productName": { "$first": "$productName" },
-                            "materialNo": { "$first": "$materialNo" },
-                            "price": { "$first": "$price" },
-                            "metaprice": { "$first": "$metaprice" },
-                            "util": { "$first": "$util" },
-                            "count": { "$first": "$count" },
-                            "storeId": { "$first": "$store.id" },
-                            "storeCount": { "$first": "$store.count" },
-                            "atcount": { "$first": "$store.atcount" },
-                            "incount": { "$first": "$store.incount" },
-                            "outcount": { "$first": "$store.outcount" }
-                        }
-                    },
-                ];
-                mongoDB[tn].aggregate(aggregates).then(result => {
-                    for (let i = 0; i < result.length; i++) {
-                        let item = result[i];
-                        mongoDB.store.updateOne({ id: item.storeId }, { $inc: { count: -item.count, outcount: item.count }, $set: { updateByUser: params.user, updateDate: new Date().getTime() } }, { upsert: true }).then(rs => {
-                            //console.log('updateOne', rs);
-                        });
-                    }
+                if (params.notCalc) {
                     resolve({
                         success: true,
-                        response: result
+                        response: res
                     })
-                });
+                } else {
+                    let aggregates = [
+                        { "$match": params.data },
+                        {
+                            $lookup: {
+                                from: "store",
+                                localField: "materialNo", //materialNo
+                                foreignField: "materialNo", //materialNo
+                                as: "store"
+                            }
+                        },
+                        {
+                            $unwind: { // 拆分子数组
+                                path: "$store",
+                                preserveNullAndEmptyArrays: true // 空的数组也拆分
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: { "id": "$id" },
+                                "id": { "$first": "$id" },
+                                "typeId": { "$first": "$typeId" },
+                                "productName": { "$first": "$productName" },
+                                "materialNo": { "$first": "$materialNo" },
+                                "price": { "$first": "$price" },
+                                "metaprice": { "$first": "$metaprice" },
+                                "util": { "$first": "$util" },
+                                "count": { "$first": "$count" },
+                                "storeId": { "$first": "$store.id" },
+                                "storeCount": { "$first": "$store.count" },
+                                "atcount": { "$first": "$store.atcount" },
+                                "incount": { "$first": "$store.incount" },
+                                "outcount": { "$first": "$store.outcount" }
+                            }
+                        },
+                    ];
+                    mongoDB[tn].aggregate(aggregates).then(result => {
+                        for (let i = 0; i < result.length; i++) {
+                            let item = result[i];
+                            mongoDB.store.updateOne({ id: item.storeId }, { $inc: { count: -item.count, outcount: item.count }, $set: { updateByUser: params.user, updateDate: new Date().getTime() } }, { upsert: true }).then(rs => {
+                                //console.log('updateOne', rs);
+                            });
+                        }
+                        resolve({
+                            success: true,
+                            response: result
+                        })
+                    });
+                }
             })
         });
     },
