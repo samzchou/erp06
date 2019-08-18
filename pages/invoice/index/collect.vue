@@ -67,7 +67,12 @@ export default {
                 sortby: 'createDate'
             }
             let result = await this.$axios.$post('mock/db', { data: condition });
-            //console.log('getFinanceList', result.list);
+            console.log('getFinanceList', result.list);
+            if (!result.list || !result.list.length) {
+                this.$message.error('没有可查询的数据！');
+                this.loadingMask && this.loadingMask.close();
+                return;
+            }
             if (this.typeId == 1) {
                 this.setCollectData(result.list);
             } else {
@@ -92,26 +97,26 @@ export default {
                         order.slvMonry = order.allPrice * this.dsCrm.slv / 100;// 税额
                         order.totalAllprice = order.slvMonry + order.allPrice; // 订单总额（含税）
 
-                        //orderAllPrice += order.allPrice; // 单价数量小计
+                        orderAllPrice += order.allPrice; // 单价数量小计
                         orderSlvMonry += order.slvMonry; // 税额小计
                         orderTotalMonry += order.totalAllprice; // 订单金额小计
 
                         num++;
                     })
-                    //totalAllprice += orderAllPrice;
+                    totalAllprice += orderAllPrice;
                     totalSlvMonry += orderSlvMonry; // 总计税额
                     totalAllMonry += orderTotalMonry; // 总计金额
                     arr = _.concat(arr, res);
                     arr.push({
                         num: '小计',
-                        //allPrice: orderAllPrice,
+                        allPrice: orderAllPrice,
                         slvMonry: orderSlvMonry,
                         totalAllprice: orderTotalMonry
                     });
                     if (idx == list.length - 1) {
                         arr.push({
                             num: '总计',
-                            //allPrice: totalAllprice,
+                            allPrice: totalAllprice,
                             slvMonry: totalSlvMonry,
                             totalAllprice: totalAllMonry
                         });

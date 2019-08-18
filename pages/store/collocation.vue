@@ -45,9 +45,10 @@
                     <el-table-column type="expand">
                         <template slot-scope="scope" v-if="scope.row.result && scope.row.result.length">
                             <el-row :gutter="20" v-for="(item,idx) in scope.row.result" :key="item.id">
-                                <el-col :span="1">
-                                    <el-checkbox v-model="item.ischecked" @change="setChecked(item, scope.row)" :disabled="item.storeCount<=0" />
+                                <el-col :span="1" v-if="item.storeCount>0">
+                                    <el-checkbox v-model="item.ischecked" @change="setChecked(item, scope.row)" />
                                 </el-col>
+                                <el-col :span="1" v-else style="color:red">缺</el-col>
                                 <el-col :span="3">
                                     <span style="width:30px">{{idx+1}}、</span>
                                     <span>业务类型：{{parseBusiness(item.business)}}</span>
@@ -62,13 +63,16 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="sourceserial" label="订单号" width="150" />
+
                     <el-table-column prop="projectNo" label="项目号" width="150" sortable />
                     <el-table-column prop="projectName" label="项目名称" />
                     <el-table-column prop="boxNo" label="箱号" width="100" />
                     <el-table-column prop="allcount" label="配料总数" width="100" />
                     <el-table-column label="是否可配料" width="100">
                         <template slot-scope="scope">
-                            <div v-html="parseColled(scope.row.result)"></div>
+                            <div v-if="scope.row.complete" style="color:green">可配料</div>
+                            <div v-else style="color:red">缺少库存</div>
+                            <!-- <div v-html="parseColled(scope.row.result)"></div> -->
                         </template>
                     </el-table-column>
                     <el-table-column prop="deliveryDate" label="交货日期" width="125" sortable>
@@ -167,7 +171,9 @@ export default {
             this.gridList.forEach(item => {
                 let index = _.findIndex(rows, { "id": item.id });
                 item.result.forEach(c => {
-                    c.ischecked = !!~index;
+                    if (c.storeCount > 0) {
+                        c.ischecked = !!~index;
+                    }
                 })
             });
         },
@@ -183,7 +189,7 @@ export default {
         },
         exportTable() {
             this.exportLoading = true;
-            //console.log('orderList', this.orderList);
+            console.log('orderList', this.orderList);
             let exportData = [], index = 0, ids = [], allCounts = 0;
             this.orderList.forEach(order => {
                 order.result.forEach(item => {
@@ -210,11 +216,10 @@ export default {
             exportData = _.sortBy(exportData, ['productName']);
             exportData = _.map(exportData, item => {
                 index++;
-                item.inex = index;
+                item.index = index;
                 return item;
             });
-            //console.log('exportData', exportData);
-
+            //this.exportLoading = false;
             import('@/components/Export2Excel').then(excel => {
                 const tHeader = ['序号', '物料名称', '物料号', '汇总数量', '包装日期', '配料人', '仓管', '领料人'];
                 const filterVal = ['index', 'productName', 'materialNo', 'count', 'deliveryDate', 'a1', 'a1', 'a3'];
@@ -226,7 +231,7 @@ export default {
                     filename: '配料单-' + now
                 });
                 this.exportLoading = false;
-                //return;
+
                 // 加入配料单表
                 this.addIndet(ids, '配料单-' + now, allCounts);
                 this.updateOrder(ids);
@@ -366,7 +371,7 @@ export default {
             }
             let storeList = await this.$axios.$post('mock/db', { data: cn });
             this.storeList = storeList.list;
-            console.log('this.storeList', this.storeList);
+            //console.log('this.storeList', this.storeList);
 
             let groupId = { "projectNo": "$projectNo" };
             match = _.merge({ "isColled": false, "flowStateId": { $lt: 9 } }, match); // $in: [3, 8] }
@@ -407,28 +412,35 @@ export default {
             };
             let result = await this.$axios.$post('mock/db', { data: condition });
             this.total = result.total;
-            this.gridList = result.list.map(item => {
+
+            let listArr = result.list.map(item => {
+                item.complete = true;
                 item.result = _.sortBy(item.result, ['projectNo', 'deliveryDate']);
                 item.result = item.result.map(c => {
                     let stroeIndex = _.findIndex(this.storeList, { 'materialNo': c.materialNo });
                     if (!!~stroeIndex) {
                         let storeItem = this.storeList[stroeIndex];
                         c.storeCount = storeItem['count'];
-                        //let rcount = c.storeCount - c.count;
                         storeItem['count'] = c.storeCount - c.count;
                         this.$set(this.storeList, stroeIndex, storeItem);
                     } else {
                         c.storeCount = 0;
                     }
-                    c.ischecked = c.storeCount > 0;
+                    if (c.storeCount <= 0) {
+                        item.complete = false;
+                    }
+                    c.ischecked = c.storeCount > 0 ? true : false;
                     return c;
                 });
                 return item;
             });
-            //console.log('this.gridList', this.gridList);
+            console.log('this.gridList', listArr[1]['result']);
+            //return;
+            this.gridList = listArr;
+            this.listLoading = false;
+
             this.$nextTick(() => {
                 this.$refs.detailStore.toggleAllSelection();
-                this.listLoading = false;
             })
         },
         // 仓库待出库Id
